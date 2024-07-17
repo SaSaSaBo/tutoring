@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { RoleGuard } from '../guards/role.guard';
 import { PermissionGuard } from '../guards/permission.guard';

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { AddCategoryDto } from '../dto/category/add.dto';

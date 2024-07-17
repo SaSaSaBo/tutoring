@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { Repository } from "typeorm";
 import { UsersEntity } from "../user/user.entity";
 import { InjectRepository } from "@nestjs/typeorm";

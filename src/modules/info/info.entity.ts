@@ -2,7 +2,7 @@ import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } f
 import { UsersEntity } from '../user/user.entity';
 
 
-@Entity('info')
+@Entity('infos')
 export class InfoEntity {
 
     @PrimaryGeneratedColumn('increment')
