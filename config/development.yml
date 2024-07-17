@@ -1,0 +1,16 @@
+appName: "TrainerTest"
+port: 3002
+pageSize: 50
+jwt:
+  secret: "18a7ba3b-7c7e-4aed-8504-a7c5b0ae5c61"
+  expired: 3600
+db:
+  type: "postgres"
+  host: "31.145.39.254"
+  port: 62107
+  username: "postgres"
+  password: "1bzmdbpass2"
+  database: "sasa"
+  synchronize: true
+  schema: "public"
+  charset: "UTF8_GENERAL_CI"

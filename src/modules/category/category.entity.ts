@@ -1,0 +1,46 @@
+import { BeforeInsert, Column, DeleteDateColumn, Entity, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { UsersEntity } from '../user/user.entity';
+
+@Entity('categorys')
+export class CategoryEntity {
+
+    @PrimaryGeneratedColumn()
+    id: number;
+
+    @Column({ length: 100 })
+    name: string;
+
+    @Column('text')
+    definement: string;
+
+    @Column({ default: true })
+    status: boolean;
+
+    @ManyToOne(() => CategoryEntity, category => category.id, { nullable: true })
+    parent: CategoryEntity; 
+    
+    @DeleteDateColumn({
+        name: 'deleted_at',
+        type: 'timestamp',
+        nullable: true,
+        default: null,
+    })
+    deletedAt: Date;
+  
+  @ManyToMany(() => UsersEntity, user => user.categories)
+  users: UsersEntity
+  
+
+  @BeforeInsert()
+  setDefaultParent() {
+    if (this.status === undefined) {
+      this.status = true;
+    }
+    if (!this.status) {
+      this.parent = null;
+    }
+  }
+
+  categoryId: any
+
+}
