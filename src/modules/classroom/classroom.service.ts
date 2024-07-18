@@ -9,7 +9,9 @@ import { InfoEntity } from '../info/info.entity';
 import { InfoService } from '../info/info.service';
 import { UsersEntity } from '../user/user.entity';
 import { JwtService } from '@nestjs/jwt';
-import { Role } from '../enum/role.enum';
+import { AuthService } from '../auth/auth.service';
+import { UserService } from '../user/user.service';
+import * as jwt from 'jsonwebtoken';
 
 @Injectable()
 export class ClassroomService {
@@ -20,7 +22,6 @@ export class ClassroomService {
 
         @InjectRepository(UsersEntity) 
         private readonly userRepository: Repository<UsersEntity>,
-
 
         private infoService: InfoService,
         private jwtService: JwtService
@@ -41,28 +42,47 @@ export class ClassroomService {
             throw new InternalServerErrorException();
         }
 
-    }   
+    }  
 */
 
-async createClassroom(createData: CreateCRDto, userId: number): Promise<ClassroomEntity> {
-    const user = await this.userRepository.findOne({ where: { id: userId }, relations: ['categories'] });
-
-    if (!user || !(user.roles.includes(Role.Teacher) || user.roles.includes(Role.SubTeacher))) {
-        throw new UnauthorizedException('Only teachers and sub-teachers can create classrooms.');
-    }
-
-    if (!user.categories || user.categories.length === 0) {
-        throw new UnauthorizedException('You must belong to a category to create a classroom.');
-    }
-
+async createClassroom(createData: CreateCRDto, accessToken: string): Promise<ClassroomEntity> {
     try {
+        // Decode accessToken to get user information
+        const decodedToken = this.jwtService.decode(accessToken) as { username: string };
+
+        console.log('DecodedToken username: ', decodedToken.username);
+
+        // Fetch user from database with categories loaded
+        const user = await this.userRepository.findOne({
+            where: { username: decodedToken.username },
+            relations: ['categories'], // Load categories relationship
+        });
+
+        console.log('User: ', user);
+        
+        if (!user) {
+            throw new NotFoundException('User not found.');
+        }
+
+        if (!user.categories || user.categories.length === 0) {
+            throw new UnauthorizedException('User is not authorized to create classrooms.');
+        }
+
+        console.log('User categories: ', user.categories);
+        console.log('User categories length: ', user.categories.length);
+        
+        
+
+        // Create new classroom entity
         const classroom = new ClassroomEntity();
         classroom.cr_name = createData.cr_name;
         classroom.capability = createData.capability;
-        classroom.users = [user]; // Classroom'a kullanıcının kendisini eklemek için
+
+        // Save classroom to database
         return await this.classroomRepository.save(classroom);
     } catch (error) {
-        throw new InternalServerErrorException();
+        console.error('Error creating classroom:', error);
+        throw new InternalServerErrorException('Failed to create classroom.', error);
     }
 }
 
@@ -151,4 +171,5 @@ async createClassroom(createData: CreateCRDto, userId: number): Promise<Classroo
               }
         }
     }
+
 }

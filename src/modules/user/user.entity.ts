@@ -39,8 +39,16 @@ export class UsersEntity extends BaseEntity {
 
   @ManyToMany(() => CategoryEntity, category => category.users)
   @JoinTable({
-    name: "cat_user"
-  })
+    name: "cat_user",
+    joinColumn: {
+        name: "usersId",
+        referencedColumnName: "id"
+    },
+    inverseJoinColumn: {
+        name: "categorysId",
+        referencedColumnName: "id"
+    }
+})
   categories: CategoryEntity[];
 
   @ManyToMany(() => ClassroomEntity, classroom => classroom.users)
@@ -55,5 +63,6 @@ export class UsersEntity extends BaseEntity {
   parentId: any
   parent: any
   name: any
+  cat_user: any;
 
 }

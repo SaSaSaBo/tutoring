@@ -30,8 +30,12 @@ export class ClassroomController {
     @Permissions('create_class')
     @Roles(Role.Teacher, Role.SubTeacher)
     @Post('create')
-    async createClassroom(@Body()  userId: number, createData: CreateCRDto) {
-        return this.crService.createClassroom(createData, userId);
+    async createClassroom(
+        @Body() createData: CreateCRDto,
+        @Req() req: any,
+    ) {
+        const accessToken = req.headers.authorization.split(' ')[1];
+        return this.crService.createClassroom(createData, accessToken);
     }
 
     @UseGuards(AuthGuard, RoleGuard, PermissionGuard)

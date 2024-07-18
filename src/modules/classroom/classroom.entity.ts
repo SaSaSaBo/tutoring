@@ -22,6 +22,8 @@ export class ClassroomEntity {
     deletedAt: Date;
 
     @ManyToMany(() => UsersEntity, user => user.classrooms)
-    users: UsersEntity;
+    users: UsersEntity[];
+    
+    categoryId: any;
 
 }

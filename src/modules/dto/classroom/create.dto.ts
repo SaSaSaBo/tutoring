@@ -1,6 +1,5 @@
 import { IsNumber, IsString } from "class-validator";
 import { ClassroomEntity } from "src/modules/classroom/classroom.entity";
-import { FindOperator } from "typeorm";
 
 export class CreateCRDto {
 
@@ -16,5 +15,7 @@ export class CreateCRDto {
         classroom.capability = this.capability;
         return classroom;
     }
-    
+
+    categoryId: any
+
 }

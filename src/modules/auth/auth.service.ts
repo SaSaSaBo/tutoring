@@ -77,15 +77,11 @@ export class AuthService {
     const jwtConfig = config.get('jwt');
     const secretOrPrivateKey = jwtConfig.secret;
 
-    const payload = { username: user.username, sub: user.id, role: user.roles }; // Burada userId yerine user.id kullanılıyor
-
+    const payload = { username: user.username, sub: user.id, role: user.roles }; 
     const accessToken = await this.jwtService.signAsync(payload, { secret: secretOrPrivateKey });
 
-    const accessExpiredDate = new Date();
-
-
     await this.userService.updateAccessToken(user.id, accessToken);
-    await this.inOutService.logAction(user.id, 'login', accessToken ); // userId yerine user.id kullanılıyor
+    await this.inOutService.logAction(user.id, 'login', accessToken ); 
 
     return { access_token: accessToken };
   }

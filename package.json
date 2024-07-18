@@ -31,6 +31,7 @@
     "class-validator": "^0.14.1",
     "config": "^3.3.12",
     "cross-env": "^7.0.3",
+    "jsonwebtoken": "^9.0.2",
     "jwt": "^0.2.0",
     "passport": "^0.7.0",
     "pg": "^8.12.0",

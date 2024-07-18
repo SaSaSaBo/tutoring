@@ -6,7 +6,7 @@ import {
   } from '@nestjs/common';
 import { UsersEntity } from './user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { getConnection, Repository } from 'typeorm';
 import { CategoryEntity } from '../category/category.entity';
 import * as bcrypt from 'bcrypt';
 import { InfoService } from '../info/info.service';
@@ -120,7 +120,6 @@ export class UserService {
     return roles.some(role => [Role.Teacher, Role.SubTeacher].includes(role));
   }
   
-
   async update(id: number, data: UserUpdateDto) {
     try {
        const user = await this.usersRepository.findOne({ where: { id: id, username: data.username } });
@@ -236,6 +235,23 @@ export class UserService {
   async getUserClassrooms(userId: number): Promise<ClassroomEntity[]> {
     const user = await this.usersRepository.findOne({ where: { id: userId }, relations: ['classrooms'] });
     return user ? user.classrooms : [];
+  }
+
+  async getUserById(id: number): Promise<UsersEntity> {
+    return this.usersRepository.findOne({where: {id}});
+  }
+
+  async hasCategory(userId: number, categoryId: number): Promise<boolean> {
+    const user = await this.usersRepository.findOne({
+      where: { id: userId },
+      relations: ['categories'],
+    });
+  
+    if (!user) {
+      return false;
+    }
+  
+    return user.categories.some((category) => category.id === categoryId);
   }
 
 }
