@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { UpdateCRDto } from '../dto/classroom/update.dto';
 import { DeleteCRDto } from '../dto/classroom/delete.dto';
 import { CreateCRDto } from '../dto/classroom/create.dto';
