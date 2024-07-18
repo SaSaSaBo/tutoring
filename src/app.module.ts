@@ -21,6 +21,9 @@ import { CategoryEntity } from './modules/category/category.entity';
 import { InfoService } from './modules/info/info.service';
 import { InfoEntity } from './modules/info/info.entity';
 import { InOutEntity } from './modules/in-out/in-out.entity';
+import { ClassroomModule } from './modules/classroom/classroom.module';
+import { ClassroomService } from './modules/classroom/classroom.service';
+import { ClassroomEntity } from './modules/classroom/classroom.entity';
 
 @Module({
   imports: [
@@ -34,6 +37,7 @@ import { InOutEntity } from './modules/in-out/in-out.entity';
       InOutEntity,
       CategoryEntity,
       InfoEntity,
+      ClassroomEntity,
     ]),
     CategoryModule, 
     TransactionModule, 
@@ -41,6 +45,7 @@ import { InOutEntity } from './modules/in-out/in-out.entity';
     InfoModule, 
     InOutModule, 
     AuthModule,
+    ClassroomModule,
   ],
   controllers: [AppController],
   providers: [
@@ -51,6 +56,7 @@ import { InOutEntity } from './modules/in-out/in-out.entity';
     InOutService,
     UserService,
     InfoService,
+    ClassroomService,
   ],
 })
 export class AppModule {

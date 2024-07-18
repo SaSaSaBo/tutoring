@@ -1,6 +1,7 @@
 import { BaseEntity, Column, DeleteDateColumn, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { CategoryEntity } from '../category/category.entity';
 import { Role } from '../enum/role.enum';
+import { ClassroomEntity } from '../classroom/classroom.entity';
 
 @Entity('users')
 export class UsersEntity extends BaseEntity {
@@ -38,11 +39,21 @@ export class UsersEntity extends BaseEntity {
 
   @ManyToMany(() => CategoryEntity, category => category.users)
   @JoinTable({
-    name: "usersToCats"
+    name: "cat_user"
   })
   categories: CategoryEntity[];
+
+  @ManyToMany(() => ClassroomEntity, classroom => classroom.users)
+  @JoinTable({
+    name: "user_cr"
+  })
+  classrooms: ClassroomEntity[];
+  
   
   permissions: any;
   userId: any;
+  parentId: any
+  parent: any
+  name: any
 
 }

@@ -2,15 +2,22 @@ import { CanActivate, ExecutionContext, Injectable, Logger, ForbiddenException }
 import { Reflector } from '@nestjs/core';
 import { roles } from '../enum/role.enum';
 import { JwtService } from '@nestjs/jwt';
+import { UserService } from '../user/user.service';
+import { CategoryService } from '../category/category.service';
 
 @Injectable()
 export class PermissionGuard implements CanActivate {
   
   private readonly logger = new Logger(PermissionGuard.name);
 
-  constructor(private reflector: Reflector, private jwtService: JwtService) {}
+  constructor(
+    private reflector: Reflector,
+    private jwtService: JwtService,
+    private usersService: UserService,
+    private categoriesService: CategoryService
+  ) {}
 
-  canActivate(context: ExecutionContext): boolean {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const requiredPermissions = this.reflector.getAllAndOverride<string[]>('permissions', [
       context.getHandler(),
       context.getClass(),
@@ -66,16 +73,31 @@ export class PermissionGuard implements CanActivate {
         return true;
       }
 
-            // Add permission for read operation (GET request)
-            if (requiredPermissions.includes('view_users') && (userRole === 'manager' || userRole === 'teacher')) {
-              // Allow read operation
-              return true;
-            }
-
-                  // Add permission for read operation (GET request)
-      if (requiredPermissions.includes('view_cats') && (userRole === 'manager' || userRole === 'teacher')) {
-        // Allow read operation
+      if (requiredPermissions.includes('view_users') && (userRole === 'manager' || userRole === 'teacher')) {
         return true;
+      }
+
+      if (requiredPermissions.includes('view_cats') && (userRole === 'manager' || userRole === 'teacher')) {
+        return true;
+      }
+
+      // Eklenen Kod: Classroom açma izni kontrolü
+      if (requiredPermissions.includes('create_classroom')) {
+        const userCategories = await this.usersService.getUserCategories(userId);
+        if (userRole === 'teacher' || userRole === 'sub_teacher') {
+          if (userCategories.length === 0) {
+            this.logger.warn('Teacher or sub_teacher cannot create classroom without a category');
+            return false;
+          }
+          if (userRole === 'sub_teacher') {
+            const userClassrooms = await this.usersService.getUserClassrooms(userId);
+            if (userClassrooms.length >= 1) {
+              this.logger.warn('Sub_teacher cannot create more than one classroom');
+              return false;
+            }
+          }
+          return true;
+        }
       }
 
       const hasPermission = requiredPermissions.every(permission => userPermissions.includes(permission));
@@ -100,26 +122,3 @@ export class PermissionGuard implements CanActivate {
     return bearer === 'Bearer' ? token : undefined;
   }
 }
-
-/*
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import { getPermissionsFromRole } from '../auth/auth.service';// İthalat yolunu buna göre ayarlayın
-
-@Injectable()
-export class PermissionGuard implements CanActivate {
-  constructor(private readonly reflector: Reflector) {}
-
-  canActivate(context: ExecutionContext): boolean {
-    const requiredPermissions = this.reflector.get<string[]>('permissions', context.getHandler());
-    if (!requiredPermissions) {
-      return true;
-    }
-
-    const { user } = context.switchToHttp().getRequest();
-    const userPermissions = getPermissionsFromRole(user.roles);
-
-    return requiredPermissions.every(permission => userPermissions.includes(permission));
-  }
-}
-*/

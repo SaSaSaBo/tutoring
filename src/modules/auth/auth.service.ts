@@ -109,6 +109,7 @@ export class AuthService {
     const payload = { username: user.username, sub: user.id }; // Burada userId yerine user.id kullanılıyor
     return this.jwtService.sign(payload);
   }
+
 }
 
 export function getPermissionsFromRole(role: Role): string[] {

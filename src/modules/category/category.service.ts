@@ -20,7 +20,7 @@ export class CategoryService {
 
     async getCategories() {
         console.log('Categories Service Called');
-        return await this.catRepository.find();
+        return await this.catRepository.find({ relations: ['parent'] });
     }    
     
     async addCategories(addData: AddCategoryDto): Promise<CategoryEntity> {

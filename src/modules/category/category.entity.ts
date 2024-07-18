@@ -1,4 +1,4 @@
-import { BeforeInsert, Column, DeleteDateColumn, Entity, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { BeforeInsert, Column, DeleteDateColumn, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { UsersEntity } from '../user/user.entity';
 
 @Entity('categorys')
@@ -16,8 +16,10 @@ export class CategoryEntity {
     @Column({ default: true })
     status: boolean;
 
-    @ManyToOne(() => CategoryEntity, category => category.id, { nullable: true })
-    parent: CategoryEntity; 
+    @ManyToOne(() => CategoryEntity, category => category.childCategories, { nullable: true })
+    parent: CategoryEntity;    
+    @OneToMany(() => CategoryEntity, category => category.parent)
+    childCategories: CategoryEntity[];
     
     @DeleteDateColumn({
         name: 'deleted_at',

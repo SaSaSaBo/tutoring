@@ -12,6 +12,9 @@ import { InfoService } from '../info/info.service';
 import { InfoEntity } from '../info/info.entity';
 import * as config from 'config';
 import { InOutEntity } from '../in-out/in-out.entity';
+import { CategoryService } from '../category/category.service';
+import { TransactionService } from '../transaction/transaction.service';
+import { TransactionEntity } from '../transaction/transaction.entity';
 
 @Module({
   imports: [
@@ -20,7 +23,8 @@ import { InOutEntity } from '../in-out/in-out.entity';
       InOutEntity,
       CategoryEntity,
       InfoEntity,
-      
+      CategoryEntity,
+      TransactionEntity,
     ]),
     JwtModule.register({
       global: true,
@@ -37,7 +41,8 @@ import { InOutEntity } from '../in-out/in-out.entity';
     JwtService,
     UserService,
     InfoService,
-
+    CategoryService,
+    TransactionService,
   ],
 })
 export class AuthModule {}

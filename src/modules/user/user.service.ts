@@ -16,6 +16,8 @@ import { PasswordService } from '../service/password.service';
 import { UsersDeleteDto } from '../dto/user/delete.dto';
 import { UserUpdateDto } from '../dto/user/update.dto';
 import { AddUsersToCatsDto } from '../dto/user/add.user.to.cat.dto';
+import { ClassroomEntity } from '../classroom/classroom.entity';
+import { Role } from '../enum/role.enum';
 
 @Injectable()
 export class UserService {
@@ -72,25 +74,53 @@ export class UserService {
     return await bcrypt.hash(password, saltRounds);
   }
 
-    async addUserToCat(dto: AddUsersToCatsDto): Promise<void> {
-            const user = await this.usersRepository.findOne({
-                where: { id: dto.userId },
-                relations: ['categories'], // Kullanıcı kategorileri ilişkisi
-            });
+  async addUserToCat(dto: AddUsersToCatsDto): Promise<void> {
+    const user = await this.usersRepository.findOne({
+      where: { id: dto.userId },
+      relations: ['categories'],
+    });
   
-            if (user) {
-                for (const categoryId of dto.categoryIds) {
-                    const category = await this.cRepository.findOne({
-                        where: { id: categoryId },
-                    });
-        
-                    if (category && !user.categories.some(c => c.id === categoryId)) {
-                        await this.usersRepository.createQueryBuilder('users').relation(UsersEntity, 'categories').of(dto.userId).add(categoryId);
-                    }
-                }
-            }
+    if (!user) {
+      throw new BadRequestException(`User with id '${dto.userId}' not found.`);
     }
   
+    // Check if user has 'teacher' or 'sub_teacher' role
+    if (!this.hasTeacherOrSubTeacherRole([user.roles])) {
+      throw new BadRequestException(`User with id '${dto.userId}' does not have permission to be added to categories.`);
+    }
+  
+    for (const categoryId of dto.categoryIds) {
+      const category = await this.cRepository.findOne({
+        where: { id: categoryId },
+        relations: ['parent'],
+      });
+  
+      if (!category) {
+        throw new BadRequestException(`Category with id '${categoryId}' not found.`);
+      }
+  
+      console.log('Category:', category);
+  
+      // Check if category supports direct assignment (parentId is not null)
+      if (!category.parent) {
+        throw new BadRequestException(`Cannot add user to category '${category.name}' because it does not support direct assignment.`);
+      }
+  
+      // Check if user is already assigned to the category
+      if (!user.categories.some(c => c.id === categoryId)) {
+        await this.usersRepository.createQueryBuilder('user')
+          .relation(UsersEntity, 'categories')
+          .of(user)
+          .add(category);
+      }
+    }
+  }
+  
+  private hasTeacherOrSubTeacherRole(roles: Role[]): boolean {
+    return roles.some(role => [Role.Teacher, Role.SubTeacher].includes(role));
+  }
+  
+
   async update(id: number, data: UserUpdateDto) {
     try {
        const user = await this.usersRepository.findOne({ where: { id: id, username: data.username } });
@@ -151,8 +181,6 @@ export class UserService {
         }
       }
   
-   
-  
       const updatedUser = { 
         ...user, 
         username: data.new_username || user.username, 
@@ -198,6 +226,16 @@ export class UserService {
         throw new Error('An error occurred while deleting the user!');
       }
     }
+  }
+
+  async getUserCategories(userId: number): Promise<CategoryEntity[]> {
+    const user = await this.usersRepository.findOne({ where: { id: userId }, relations: ['categories'] });
+    return user ? user.categories : [];
+  }
+
+  async getUserClassrooms(userId: number): Promise<ClassroomEntity[]> {
+    const user = await this.usersRepository.findOne({ where: { id: userId }, relations: ['classrooms'] });
+    return user ? user.classrooms : [];
   }
 
 }

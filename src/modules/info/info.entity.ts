@@ -17,4 +17,8 @@ export class InfoEntity {
     @CreateDateColumn()
     infoDate: Date;
 
+    classroom: any
+
+
+
 }
