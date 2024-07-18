@@ -54,8 +54,12 @@ export class ClassroomController {
     @Permissions('delete_class')
     @Roles(Role.Teacher, Role.SubTeacher)
     @Delete('delete')
-    async deleteClassroom(@Body() deleteData: DeleteCRDto) {
-        return this.crService.deleteClassroom(deleteData);
+    async deleteClassroom(
+        @Body() deleteData: DeleteCRDto,
+        @Req() req: any,
+    ) {
+        const accessToken = req.headers.authorization.split(' ')[1];
+        return this.crService.deleteClassroom(deleteData, accessToken);
     }
 
 }

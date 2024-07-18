@@ -9,9 +9,6 @@ import { InfoEntity } from '../info/info.entity';
 import { InfoService } from '../info/info.service';
 import { UsersEntity } from '../user/user.entity';
 import { JwtService } from '@nestjs/jwt';
-import { AuthService } from '../auth/auth.service';
-import { UserService } from '../user/user.service';
-import * as jwt from 'jsonwebtoken';
 
 @Injectable()
 export class ClassroomService {
@@ -78,32 +75,33 @@ export class ClassroomService {
             throw new InternalServerErrorException('Failed to create classroom.', error);
         }
     }
-    
 
     async updateClassroom(id: number, updateData: UpdateCRDto, accessToken: string) {
         try {
-            const classroom = await this.classroomRepository.findOneBy({ id: id });
-            console.log(classroom);
-    
-            if (!classroom) {
-                throw new NotFoundException('Classroom not found!');
-            }
-    
-            const updateMessage = [];
-            const log = new InfoEntity();
-            log.classroom = classroom;
-    
-            // Extract userId from accessToken
+            // Decode accessToken to get user information
             const decodedToken = this.jwtService.decode(accessToken) as { sub: number };
-            console.log(decodedToken);
-    
             const sub = decodedToken.sub;
-            const user = await this.userRepository.findOneBy({ id: sub });
+    
+            // Fetch user from database with classrooms loaded
+            const user = await this.userRepository.findOne({
+                where: { id: sub },
+                relations: ['classrooms'], // Load classrooms relationship
+            });
     
             if (!user) {
                 throw new NotFoundException('User not found!');
             }
     
+            // Check if the classroom belongs to the user
+            const classroom = user.classrooms.find(classroom => classroom.id === id);
+    
+            if (!classroom) {
+                throw new UnauthorizedException('User is not authorized to update this classroom.');
+            }
+    
+            const updateMessage = [];
+            const log = new InfoEntity();
+            log.classroom = classroom;
             log.user = user;  // user nesnesini doğrudan log.user'a atayın
     
             if (updateData.new_cr_name) {
@@ -139,16 +137,42 @@ export class ClassroomService {
             throw new InternalServerErrorException(error.message || error);
         }
     }
-    
-    async deleteClassroom(deleteData: DeleteCRDto) {
-        const { cr_name } = deleteData;
 
+    async deleteClassroom(deleteData: DeleteCRDto, accessToken: string) {
+
+        console.log('DeleteData: ', deleteData);
+        
         try {
-            const classroom = await this.classroomRepository.findOneBy({ cr_name: cr_name, deletedAt: null });
+            if (!deleteData || !deleteData.cr_name) {
+                throw new BadRequestException('Invalid delete request. Missing cr_name.');
+            }
+    
+            // Decode accessToken to get user information
+            const decodedToken = this.jwtService.decode(accessToken) as { sub: number };
+            const sub = decodedToken.sub;
+
+            console.log('DecodedToken sub: ', sub);
+            
+            // Fetch user from database with classrooms loaded
+            const user = await this.userRepository.findOne({
+                where: { id: sub },
+                relations: ['classrooms'], // Load classrooms relationship
+            });
+
+            console.log('User: ', user);
+            
+    
+            if (!user) {
+                throw new NotFoundException('User not found!');
+            }
+    
+            // Find the classroom the user wants to delete
+            const classroom = user.classrooms.find(classroom => classroom.cr_name === deleteData.cr_name && classroom.deletedAt === null);
+    
             if (!classroom) {
                 throw new NotFoundException('Classroom not found!');
             }
-
+    
             if (deleteData.softDelete === true) {
                 classroom.deletedAt = new Date();
                 await this.classroomRepository.save(classroom);
@@ -160,9 +184,9 @@ export class ClassroomService {
         } catch (error) {
             if (error instanceof NotFoundException || error instanceof BadRequestException) {
                 throw error;
-              } else {
-                throw new Error('An error occurred while deleting the classroom!');
-              }
+            } else {
+                throw new InternalServerErrorException('An error occurred while deleting the classroom!', error);
+            }
         }
     }
 
