@@ -44,6 +44,8 @@ export class PermissionGuard implements CanActivate {
       const requestedUserId = +request.params.id;
       const body = request.body;
 
+      console.log('User role: ' + userRole, 'User ID: ' + userId);
+
       const userPermissions = roles[userRole];
       if (!userPermissions) {
         this.logger.error('User permissions not found for role:', userRole);
@@ -73,7 +75,11 @@ export class PermissionGuard implements CanActivate {
         return true;
       }
 
-      if (requiredPermissions.includes('view_users') && (userRole === 'manager' || userRole === 'teacher')) {
+      if (requiredPermissions.includes('view_users') && (userRole === 'manager' || userRole === 'teacher' || userRole === 'sub_teacher')) {
+        return true;
+      }
+
+      if (requiredPermissions.includes('view_user') && (userRole === 'student')) {
         return true;
       }
 
