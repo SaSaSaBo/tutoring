@@ -10,9 +10,7 @@ import { UserRegisterDto } from "../dto/user/register.dto";
 import { ResponseRegister } from "./interface/response.register";
 import { UserLoginDto } from "../dto/user/login.dto";
 import * as config from 'config';
-import { permission } from "process";
 import { Role, roles } from "../enum/role.enum";
-import { access } from "fs";
 
 @Injectable()
 export class AuthService {

@@ -18,8 +18,8 @@ export class ClassroomController {
     ) {}
 
     @UseGuards(AuthGuard, RoleGuard, PermissionGuard)
-    @Permissions('view_crs')
-    @Roles(Role.Manager, Role.Teacher, Role.SubTeacher)
+    @Permissions('view_crs', 'view_clrs')
+    @Roles(Role.Manager, Role.Teacher, Role.SubTeacher, Role.Student)
     @Get()
     async getClassrooms() {
         console.log('Classrooms Controller Called');

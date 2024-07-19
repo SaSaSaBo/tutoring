@@ -83,6 +83,14 @@ export class PermissionGuard implements CanActivate {
         return true;
       }
 
+      if (requiredPermissions.includes('view_crs') && (userRole === 'manager' || userRole === 'teacher' || userRole === 'sub_teacher')) {
+        return true;
+      }
+
+      if (requiredPermissions.includes('view_clrs') && (userRole === 'student')) {
+        return true;
+      }
+
       if (requiredPermissions.includes('view_cats') && (userRole === 'manager' || userRole === 'teacher')) {
         return true;
       }

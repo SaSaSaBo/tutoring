@@ -34,7 +34,8 @@ export const roles = {
         'delete_class'
     ],
     student: [
-        'view_crs',
+        'view_clrs',
+        'view_user',
         'update_own_profile'
     ],
 };
