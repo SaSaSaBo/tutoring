@@ -15,6 +15,7 @@ import { TransactionService } from '../transaction/transaction.service';
 import { InOutService } from '../in-out/in-out.service';
 import { UserService } from '../user/user.service';
 import { PasswordService } from '../service/password.service';
+import { UserCrEntity } from '../entity/user.cr.entity';
 
 @Module({
   imports: [
@@ -24,7 +25,8 @@ import { PasswordService } from '../service/password.service';
       UsersEntity,
       CategoryEntity,
       TransactionEntity,
-      InOutEntity
+      InOutEntity,
+      UserCrEntity,
     ])
   ],
   providers: [

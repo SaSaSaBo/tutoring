@@ -31,47 +31,35 @@ export class ClassroomService {
     async createClassroom(createData: CreateCRDto, accessToken: string): Promise<ClassroomEntity> {
         try {
             // Decode accessToken to get user information
-            const decodedToken = this.jwtService.decode(accessToken) as { username: string };
-    
-            console.log('DecodedToken username: ', decodedToken.username);
-    
-            // Fetch user from database with categories and classrooms loaded
+            const decodedToken = this.jwtService.decode(accessToken);
+            console.log('DecodedToken: ', decodedToken);
+
+            // Fetch user from database with categories loaded
             const user = await this.userRepository.findOne({
                 where: { username: decodedToken.username },
-                relations: ['categories', 'classrooms'], // Load categories and classrooms relationships
+                relations: ['categories'], // Load categories relationship
             });
-    
-            console.log('User: ', user);
-            
+
             if (!user) {
                 throw new NotFoundException('User not found.');
             }
-    
-            // Check if user has any categories
-            if (!user.categories || user.categories.length === 0) {
+
+            // Check if user has any categories that allow classroom creation
+            const canCreateClassroom = user.categories.length > 0;
+
+            if (!canCreateClassroom) {
                 throw new UnauthorizedException('User is not authorized to create classrooms.');
             }
-    
-            // Check user role and classroom creation rules
-            if (user.roles.includes('sub_teacher') && user.classrooms.length > 0) {
-                throw new UnauthorizedException('Sub_teacher is only allowed to create one classroom.');
-            }
-    
+
             // Create new classroom entity
             const classroom = new ClassroomEntity();
             classroom.cr_name = createData.cr_name;
             classroom.capability = createData.capability;
-    
+            classroom.creator = decodedToken.sub;
+
             // Save classroom to database
-            const savedClassroom = await this.classroomRepository.save(classroom);
-    
-            // Establish many-to-many relationship
-            user.classrooms.push(savedClassroom);
-            await this.userRepository.save(user);
-    
-            return savedClassroom;
+            return await this.classroomRepository.save(classroom);
         } catch (error) {
-            console.error('Error creating classroom:', error);
             throw new InternalServerErrorException('Failed to create classroom.', error);
         }
     }

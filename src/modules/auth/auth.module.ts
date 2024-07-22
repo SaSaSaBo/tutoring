@@ -15,6 +15,8 @@ import { InOutEntity } from '../in-out/in-out.entity';
 import { CategoryService } from '../category/category.service';
 import { TransactionService } from '../transaction/transaction.service';
 import { TransactionEntity } from '../transaction/transaction.entity';
+import { UserCrEntity } from '../entity/user.cr.entity';
+import { ClassroomEntity } from '../classroom/classroom.entity';
 
 @Module({
   imports: [
@@ -25,6 +27,8 @@ import { TransactionEntity } from '../transaction/transaction.entity';
       InfoEntity,
       CategoryEntity,
       TransactionEntity,
+      UserCrEntity,
+      ClassroomEntity,
     ]),
     JwtModule.register({
       global: true,

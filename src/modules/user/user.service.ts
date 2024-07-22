@@ -1,12 +1,14 @@
 import {
     BadRequestException,
+    ForbiddenException,
     Injectable,
     InternalServerErrorException,
     NotFoundException,
+    UnauthorizedException,
   } from '@nestjs/common';
 import { UsersEntity } from './user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { getConnection, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CategoryEntity } from '../category/category.entity';
 import * as bcrypt from 'bcrypt';
 import { InfoService } from '../info/info.service';
@@ -18,6 +20,9 @@ import { UserUpdateDto } from '../dto/user/update.dto';
 import { AddUsersToCatsDto } from '../dto/user/add.user.to.cat.dto';
 import { ClassroomEntity } from '../classroom/classroom.entity';
 import { Role } from '../enum/role.enum';
+import { AddStudentToClrDto } from '../dto/user/add.student.to.clr.dto';
+import { JwtService } from '@nestjs/jwt';
+import { UserCrEntity } from '../entity/user.cr.entity';
 
 @Injectable()
 export class UserService {
@@ -30,12 +35,18 @@ export class UserService {
     private usersRepository: Repository<UsersEntity>,
   
     @InjectRepository(CategoryEntity)
-    private cRepository: Repository<UsersEntity>,
-
+    private cRepository: Repository<CategoryEntity>,
 
     @InjectRepository(InOutEntity)
     private inOutRepository: Repository<InOutEntity>,
+
+    @InjectRepository(UserCrEntity)
+    private userCrRepository: Repository<UserCrEntity>,
+
+    @InjectRepository(ClassroomEntity)
+    private classroomRepository: Repository<ClassroomEntity>,
   
+    private jwtService: JwtService,
     private infoService: InfoService,
     private passwordService:  PasswordService,
   ) {}
@@ -116,6 +127,36 @@ export class UserService {
     }
   }
   
+  async addStdntToClr(addData: AddStudentToClrDto, accessToken: string): Promise<UserCrEntity> {
+    const decodedToken = this.jwtService.verify(accessToken);
+    const teacher = await this.usersRepository.findOne({ where: { id: decodedToken.userId } });
+
+    console.log('Decoded token:', decodedToken);
+    console.log('Teacher:', teacher);
+    
+    if (!teacher || (teacher.roles !== Role.Teacher && teacher.roles !== Role.SubTeacher)) {
+        throw new ForbiddenException('Only teachers or sub_teachers can add students to classrooms.');
+    }
+
+    const classroom = await this.classroomRepository.findOne({ where: { id: addData.classroomId, creator: teacher } });
+
+    if (!classroom) {
+        throw new NotFoundException('Classroom not found or you do not have access to this classroom.');
+    }
+
+    const student = await this.usersRepository.findOne({ where: { id: addData.studentId, roles: Role.Student } });
+
+    if (!student) {
+        throw new NotFoundException('Student not found.');
+    }
+
+    const userCr = new UserCrEntity();
+    userCr.userId = student;
+    userCr.classroomId = classroom;
+    userCr.addedBy = teacher.id;
+
+    return this.userCrRepository.save(userCr);
+}
   private hasTeacherOrSubTeacherRole(roles: Role[]): boolean {
     return roles.some(role => [Role.Teacher, Role.SubTeacher].includes(role));
   }

@@ -15,6 +15,8 @@ import { TransactionService } from '../transaction/transaction.service';
 import { AuthenticationService } from '../in-out/auth/authentication.service';
 import { AuthService } from '../auth/auth.service';
 import { InOutEntity } from '../in-out/in-out.entity';
+import { UserCrEntity } from '../entity/user.cr.entity';
+import { ClassroomEntity } from '../classroom/classroom.entity';
 
 @Module({
   imports: [
@@ -24,6 +26,8 @@ import { InOutEntity } from '../in-out/in-out.entity';
       TransactionEntity,
       InfoEntity,
       InOutEntity,
+      UserCrEntity,
+      ClassroomEntity
     ])
   ],
   controllers: [UserController],

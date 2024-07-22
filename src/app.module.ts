@@ -24,6 +24,7 @@ import { InOutEntity } from './modules/in-out/in-out.entity';
 import { ClassroomModule } from './modules/classroom/classroom.module';
 import { ClassroomService } from './modules/classroom/classroom.service';
 import { ClassroomEntity } from './modules/classroom/classroom.entity';
+import { UserCrEntity } from './modules/entity/user.cr.entity';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { ClassroomEntity } from './modules/classroom/classroom.entity';
       CategoryEntity,
       InfoEntity,
       ClassroomEntity,
+      UserCrEntity,
     ]),
     CategoryModule, 
     TransactionModule, 

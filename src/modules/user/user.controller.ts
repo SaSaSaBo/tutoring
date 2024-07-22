@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, HttpException, HttpStatus, Param, ParseIntPipe, Post, Put, UseGuards, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, HttpException, HttpStatus, Param, ParseIntPipe, Post, Put, Req, UseGuards, ValidationPipe } from '@nestjs/common';
 import { UserUpdateDto } from '../dto/user/update.dto';
 import { UsersDeleteDto } from '../dto/user/delete.dto';
 import { UserService } from './user.service';
@@ -9,6 +9,7 @@ import { Role } from '../enum/role.enum';
 import { AddUsersToCatsDto } from '../dto/user/add.user.to.cat.dto';
 import { Permissions } from '../decorator/permission.decorator';
 import { Roles } from '../decorator/role.decorator';
+import { AddStudentToClrDto } from '../dto/user/add.student.to.clr.dto';
 
 
 @Controller('user')
@@ -25,6 +26,17 @@ export class UserController {
       async addUserToCat(
         @Body() addUserToCatDto: AddUsersToCatsDto ) {
         return this.userService.addUserToCat(addUserToCatDto);
+      }
+
+      @Post('add/stdnt')
+      @UseGuards(AuthGuard, RoleGuard, PermissionGuard)
+      @Permissions('add_student')
+      @Roles(Role.Teacher, Role.SubTeacher)
+      async addStdntToClr(
+        @Body() addData: AddStudentToClrDto,
+        @Req()  accessToken: string
+      ) {
+        return this.userService.addStdntToClr(addData, accessToken);
       }
     
       @Put('update/:id')

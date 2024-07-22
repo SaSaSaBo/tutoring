@@ -1,4 +1,4 @@
-import { BaseEntity, Column, DeleteDateColumn, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { BaseEntity, Column, DeleteDateColumn, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { CategoryEntity } from '../category/category.entity';
 import { Role } from '../enum/role.enum';
 import { ClassroomEntity } from '../classroom/classroom.entity';
@@ -50,14 +50,8 @@ export class UsersEntity extends BaseEntity {
     }
 })
   categories: CategoryEntity[];
-
-  @ManyToMany(() => ClassroomEntity, classroom => classroom.users)
-  @JoinTable({
-    name: "user_cr"
-  })
-  classrooms: ClassroomEntity[];
   
-  
+  classrooms: any;
   permissions: any;
   userId: any;
   parentId: any

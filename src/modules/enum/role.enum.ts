@@ -21,6 +21,7 @@ export const roles = {
         'view_users', 
         'view_cats',
         'view_crs',
+        'add_student',
         'create_class',
         'update_class',
         'delete_class'
@@ -29,6 +30,7 @@ export const roles = {
         'view_users', 
         'view_cats',
         'view_crs',
+        'add_student',
         'create_class',
         'update_class',
         'delete_class'

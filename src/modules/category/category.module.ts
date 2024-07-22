@@ -15,6 +15,8 @@ import { InfoEntity } from '../info/info.entity';
 import { AuthenticationService } from '../in-out/auth/authentication.service';
 import { AuthService } from '../auth/auth.service';
 import { InOutEntity } from '../in-out/in-out.entity';
+import { UserCrEntity } from '../entity/user.cr.entity';
+import { ClassroomEntity } from '../classroom/classroom.entity';
 @Module({
   imports: [
     TypeOrmModule.forFeature([ 
@@ -23,6 +25,8 @@ import { InOutEntity } from '../in-out/in-out.entity';
       UsersEntity,
       InfoEntity,
       InOutEntity,
+      UserCrEntity,
+      ClassroomEntity,
     ]),
   ],
   controllers: [CategoryController],

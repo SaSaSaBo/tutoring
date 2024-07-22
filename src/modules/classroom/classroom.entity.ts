@@ -1,5 +1,6 @@
-import { Column, DeleteDateColumn, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, DeleteDateColumn, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { UsersEntity } from '../user/user.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity('classroom')
 export class ClassroomEntity {
@@ -13,6 +14,10 @@ export class ClassroomEntity {
     @Column()
     capability: number;
 
+    @ManyToOne(() => UsersEntity, user => user.classrooms, { eager: false })
+    @Exclude()
+    creator: UsersEntity;
+
     @DeleteDateColumn({
         name: 'deleted_at',
         type: 'timestamp',
@@ -21,9 +26,7 @@ export class ClassroomEntity {
     })
     deletedAt: Date;
 
-    @ManyToMany(() => UsersEntity, user => user.classrooms)
-    users: UsersEntity[];
-    
     categoryId: any;
+    classroomId: any;
 
 }
