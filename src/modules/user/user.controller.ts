@@ -23,8 +23,8 @@ export class UserController {
       @UseGuards(AuthGuard, RoleGuard, PermissionGuard)
       @Permissions('view_users')
       @Roles(Role.Manager)
-      async findAll (@Req() accessToken: string) {
-        return this.userService.findAll(accessToken);
+      async findAll () {
+        return this.userService.findAll();
       }
 
       @Get('sub-teachers')

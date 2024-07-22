@@ -25,6 +25,7 @@ import { Role } from '../enum/role.enum';
 import { AddStudentToClrDto } from '../dto/user/add.student.to.clr.dto';
 import { JwtService } from '@nestjs/jwt';
 import { UserCrEntity } from '../entity/user.cr.entity';
+import { AnyARecord } from 'dns';
 
 @Injectable()
 export class UserService {
@@ -67,67 +68,99 @@ export class UserService {
 
 
 
+  // async findAll(userId: number): Promise<UsersEntity[]> {
+  //   try {
+  //     // Öncelikle kullanıcıyı bul
+  //     const user = await this.usersRepository.findOne({ where: { id: userId }, relations: ['categories'] });
+  //     if (!user) {
+  //       throw new Error('User not found');
+  //     }
+  
+  //     console.log('User: ', user);
+  
+  //     // Kullanıcının kategorilerini al
+  //     const categories = user.categories;
+  //     const categoryIds = categories.map(category => category.id);
+  
+  //     console.log('Categories: ', categories);
+  //     console.log('CategoryIds: ', categoryIds);
+  
+  //     // Kategori ID'lerini kontrol et
+  //     if (categoryIds.length === 0) {
+  //       return [];
+  //     }
+  
+  //     // Kullanıcının açtığı kategorilere ait sınıfları bul
+  //     const classrooms = await this.userCrRepository
+  //       .createQueryBuilder('user_cr')
+  //       .leftJoinAndSelect('user_cr.classroom', 'classroom')
+  //       .where('user_cr.addedBy = :userId', { userId })
+  //       .andWhere('classroom.categoryId IN (:...categoryIds)', { categoryIds })
+  //       .getMany();
+  
+  //     console.log('Classrooms: ', classrooms);
+  
+  //     const classroomIds = classrooms.map(userCr => userCr.classroom.id);
+  
+  //     console.log('ClassroomIds: ', classroomIds);
+  
+  //     // Sınıf ID'lerini kontrol et
+  //     if (classroomIds.length === 0) {
+  //       return [];
+  //     }
+  
+  //     // Belirtilen sınıflara ait öğrencileri bul
+  //     const usersInClassrooms = await this.userCrRepository
+  //       .createQueryBuilder('user_cr')
+  //       .leftJoinAndSelect('user_cr.user', 'user')
+  //       .where('user_cr.classroomId IN (:...classroomIds)', { classroomIds })
+  //       .getMany();
+  
+  //     console.log('UsersInClassrooms: ', usersInClassrooms);
+  
+  //     const userIds = usersInClassrooms.map(userCr => userCr.user.id);
+  
+  //     console.log('UserIds: ', userIds);
+  
+  //     // Kullanıcı ID'lerini kontrol et
+  //     if (userIds.length === 0) {
+  //       return [];
+  //     }
+  
+  //     // Kullanıcıları ID'lerine göre bul
+  //     const users = await this.usersRepository
+  //       .createQueryBuilder('user')
+  //       .where('user.id IN (:...userIds)', { userIds })
+  //       .getMany();
+  
+  //     console.log('Users: ', users);
+  
+  //     return users;
+  //   } catch (error) {
+  //     console.error('Error in findAll method:', error);
+  //     throw error;
+  //   }
+  // }
+  
+  
 
 
 
 
 
-  async findAll(accessToken: string): Promise<UsersEntity[]> {
-    const decodedToken = this.jwtService.verify(accessToken);
-    const userId = decodedToken.sub;
 
-    // Manager kullanıcısının açtığı kategorileri bul
-    const managerCategories = await this.cRepository.find({
-      where: { createdBy: { id: userId } },
-    });
 
-    const managerCategoryIds = managerCategories.map(category => category.id);
 
-    // Bu kategorilerde bulunan teacher ve sub_teacher kullanıcılarını bul
-    const teacherAndSubTeachers = await this.usersRepository.find({
-      where: {
-        roles: In([Role.Teacher, Role.SubTeacher]),
-        categories: { id: In(managerCategoryIds) },
-      },
-    });
 
-    const teacherAndSubTeacherIds = teacherAndSubTeachers.map(user => user.id);
 
-    // Bu teacher ve sub_teacher kullanıcılarının açtığı sınıfları bul
-    const classes = await this.classroomRepository.find({
-      where: { creator: { id: In(teacherAndSubTeacherIds) } },
-    });
 
-    const classIds = classes.map(classEntity => classEntity.id);
 
-    // Bu sınıflarda bulunan student kullanıcılarını bul
-    const students = await this.usersRepository.find({
-      where: {
-        roles: Role.Student,
-        classrooms: { id: In(classIds) },
-      },
-    });
 
-    return [...teacherAndSubTeachers, ...students];
+
+
+  async findAll(): Promise<UsersEntity[]> {
+      return this.usersRepository.find();
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   async findAllStudents(): Promise<UsersEntity[]> {
       return this.usersRepository.find({ where: { roles: Role.Student } });
