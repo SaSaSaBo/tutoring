@@ -68,6 +68,77 @@ export class UserService {
 
 
 
+
+
+
+
+
+
+
+
+  async findAllStudents(): Promise<UsersEntity[]> {
+    // Öğretmenler ve yardımcı öğretmenlerin oluşturduğu sınıfları bul
+    const classrooms = await this.classroomRepository
+      .createQueryBuilder('classroom')
+      .leftJoinAndSelect('classroom.creator', 'creator')
+      .where('creator.roles IN (:...roles)', { roles: [Role.Teacher, Role.SubTeacher] })
+      .getMany();
+
+    // Sınıflarda kayıtlı olan 'student' rolüne sahip kullanıcıları bul
+    const studentClassRelations = await this.userCrRepository
+      .createQueryBuilder('user_cr')
+      .leftJoinAndSelect('user_cr.user', 'user')
+      .where('user_cr.classroomId IN (:...classroomIds)', { classroomIds: classrooms.map(c => c.id) })
+      .andWhere('user.roles = :role', { role: Role.Student })
+      .getMany();
+
+    // 'user' ilişkisini kullanarak öğrenci ID'lerini al
+    const studentIds = studentClassRelations.map(relation => relation.user.id);
+
+    const students = await this.usersRepository
+      .createQueryBuilder('user')
+      .where('user.id IN (:...studentIds)', { studentIds })
+      .getMany();
+
+    return students;
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   // async findAll(userId: number): Promise<UsersEntity[]> {
   //   try {
   //     // Öncelikle kullanıcıyı bul
@@ -162,9 +233,9 @@ export class UserService {
       return this.usersRepository.find();
   }
 
-  async findAllStudents(): Promise<UsersEntity[]> {
-      return this.usersRepository.find({ where: { roles: Role.Student } });
-  }
+  // async findAllStudents(): Promise<UsersEntity[]> {
+  //     return this.usersRepository.find({ where: { roles: Role.Student } });
+  // }
 
   async findAllSubTeachers(): Promise<UsersEntity[]> {
     return this.usersRepository.find({
