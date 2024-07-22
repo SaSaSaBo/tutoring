@@ -9,7 +9,7 @@ export class UserCrEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @ManyToOne(() => UsersEntity, (user) => user.userId)
+    @ManyToOne(() => UsersEntity, (user) => user.userId, {onDelete: 'CASCADE'})
     @JoinColumn({
       name: "user_id",
     })

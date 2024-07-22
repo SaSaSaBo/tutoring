@@ -1,4 +1,4 @@
-import { Column, DeleteDateColumn, Entity, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { UsersEntity } from '../user/user.entity';
 import { Exclude } from 'class-transformer';
 import { CategoryEntity } from '../category/category.entity';
@@ -19,8 +19,11 @@ export class ClassroomEntity {
     @Exclude()
     creator: UsersEntity;
 
-    @ManyToOne(() => CategoryEntity, category => category.classrooms)
+    @ManyToOne(() => CategoryEntity, category => category.classrooms, {onDelete: 'CASCADE'})
     category: CategoryEntity; // Change to singular
+
+    @CreateDateColumn()
+    created_at: Date;    
 
     @DeleteDateColumn({
         name: 'deleted_at',

@@ -35,14 +35,14 @@ export class ClassroomController {
     //     return this.crService.getClassroomsForTeachs(userId);
     // }
 
-    // @UseGuards(AuthGuard, RoleGuard, PermissionGuard)
-    // @Permissions('view_clrs')
-    // @Roles(Role.Student)
-    // @Get()
-    // async getClassroomsForStdnt() {
-    //     console.log('Classrooms Controller Called');
-    //     return this.crService.getClassroomsForStdnt();
-    // }
+    @UseGuards(AuthGuard, RoleGuard, PermissionGuard)
+    @Permissions('view_clrs')
+    @Roles(Role.Student)
+    @Get('asStdnt')
+    async getClassroomsForStdnt() {
+        console.log('Classrooms Controller Called');
+        return this.crService.getClassroomsForStdnt();
+    }
 
     @UseGuards(AuthGuard, RoleGuard, PermissionGuard)
     @Permissions('create_class')

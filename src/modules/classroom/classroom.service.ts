@@ -44,9 +44,12 @@ export class ClassroomService {
     //         studentCount: Number(classroom.studentcount),
     //     }));
     // }
-    // async getClassroomsForStdnt() {
-    //     return await this.classroomRepository.find();
-    // }
+
+    async getClassroomsForStdnt() {
+        return await this.classroomRepository.find({
+            relations: ['creator'],
+        });
+    }
 
     async createClassroom(createData: CreateCRDto, accessToken: string): Promise<ClassroomEntity> {
         try {
