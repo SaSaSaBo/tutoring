@@ -129,10 +129,7 @@ export class UserService {
     }
   }
   
-  async addStdntToClr(
-    addStudentToClrDto: AddStudentToClrDto,
-    accessToken: string
-  ): Promise<void> {
+  async addStdntToClr(addStudentToClrDto: AddStudentToClrDto, accessToken: string): Promise<void> {
     // JWT'den kullanıcı kimliğini al
     const decodedToken = this.jwtService.decode(accessToken) as { sub: number };
     const addedBy = decodedToken.sub;
