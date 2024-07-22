@@ -24,7 +24,6 @@ export class AuthService {
     private passwordService: PasswordService
   ) {}
 
-
   async findAll() {
     console.log('Users Service Called');
     return await this.usersRepository.find();

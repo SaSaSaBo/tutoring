@@ -29,17 +29,6 @@ export class UserController {
         return this.userService.addUserToCat(addUserToCatDto);
       }
 
-      // @Post('add/stdnt')
-      // @UseGuards(AuthGuard, RoleGuard, PermissionGuard)
-      // @Permissions('add_student')
-      // @Roles(Role.Teacher, Role.SubTeacher)
-      // async addStdntToClr(
-      //   @Body() addData: AddStudentToClrDto, // DTO'yu burada alıyoruz
-      //   @Req() accessToken: string
-      // ){
-      //   return this.userService.addStdntToClr(addData, accessToken);
-      // }
-
       @Post('add/stdnt')
       @UseGuards(AuthGuard, RoleGuard, PermissionGuard)
       @Permissions('add_student')
