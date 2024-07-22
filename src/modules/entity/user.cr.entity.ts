@@ -1,5 +1,5 @@
 // src/user_cr/user_cr.entity.ts
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { UsersEntity } from '../user/user.entity';
 import { ClassroomEntity } from '../classroom/classroom.entity';
 
@@ -10,12 +10,18 @@ export class UserCrEntity {
     id: number;
 
     @ManyToOne(() => UsersEntity, (user) => user.userId)
-    userId: UsersEntity;
+    @JoinColumn({
+      name: "user_id",
+    })
+    user: UsersEntity;
 
-    @ManyToOne(() => ClassroomEntity, (classroom) => classroom.classroomId)
-    classroomId: ClassroomEntity;
+    @ManyToOne(() => ClassroomEntity, (classroom) => classroom.classroomId,{onUpdate:"CASCADE",onDelete:"CASCADE"})
+    classroom: ClassroomEntity;
 
-    @Column()
-    addedBy: number; 
+    @ManyToOne(() => UsersEntity, (user) => user.userId)
+    @JoinColumn({
+      name: "added_by",
+    })
+    addedBy: UsersEntity; 
 
 }

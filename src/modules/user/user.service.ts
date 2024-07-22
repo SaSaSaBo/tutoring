@@ -1,6 +1,8 @@
 import {
     BadRequestException,
     ForbiddenException,
+    HttpException,
+    HttpStatus,
     Injectable,
     InternalServerErrorException,
     NotFoundException,
@@ -127,36 +129,44 @@ export class UserService {
     }
   }
   
-  async addStdntToClr(addData: AddStudentToClrDto, accessToken: string): Promise<UserCrEntity> {
-    const decodedToken = this.jwtService.verify(accessToken);
-    const teacher = await this.usersRepository.findOne({ where: { id: decodedToken.userId } });
+  async addStdntToClr(
+    addStudentToClrDto: AddStudentToClrDto,
+    accessToken: string
+  ): Promise<void> {
+    // JWT'den kullanıcı kimliğini al
+    const decodedToken = this.jwtService.decode(accessToken) as { sub: number };
+    const addedBy = decodedToken.sub;
 
-    console.log('Decoded token:', decodedToken);
-    console.log('Teacher:', teacher);
-    
-    if (!teacher || (teacher.roles !== Role.Teacher && teacher.roles !== Role.SubTeacher)) {
-        throw new ForbiddenException('Only teachers or sub_teachers can add students to classrooms.');
+    const { userId, classroomId } = addStudentToClrDto;
+
+    try {
+      // Kullanıcıyı ve sınıfı bul
+      const user = await this.usersRepository.findOne({ where: { id: userId } });
+      const classroom = await this.classroomRepository.findOne({ where: { id: classroomId } });
+
+      if (!user || !classroom) {
+        throw new HttpException(
+          'Kullanıcı veya sınıf bulunamadı',
+          HttpStatus.NOT_FOUND
+        );
+      }
+
+      // UserCrEntity nesnesini oluşturarak kaydediyoruz
+      const userCrEntity = this.userCrRepository.create({
+        user: user,
+        classroom: classroom,
+        addedBy:{id:addedBy}
+      }); 
+
+      await this.userCrRepository.save(userCrEntity);
+    } catch (error) {
+      throw new HttpException(
+        'Öğrenci sınıfa eklenirken bir hata oluştu',
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
     }
+  }
 
-    const classroom = await this.classroomRepository.findOne({ where: { id: addData.classroomId, creator: teacher } });
-
-    if (!classroom) {
-        throw new NotFoundException('Classroom not found or you do not have access to this classroom.');
-    }
-
-    const student = await this.usersRepository.findOne({ where: { id: addData.studentId, roles: Role.Student } });
-
-    if (!student) {
-        throw new NotFoundException('Student not found.');
-    }
-
-    const userCr = new UserCrEntity();
-    userCr.userId = student;
-    userCr.classroomId = classroom;
-    userCr.addedBy = teacher.id;
-
-    return this.userCrRepository.save(userCr);
-}
   private hasTeacherOrSubTeacherRole(roles: Role[]): boolean {
     return roles.some(role => [Role.Teacher, Role.SubTeacher].includes(role));
   }

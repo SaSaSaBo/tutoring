@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, HttpException, HttpStatus, Param, ParseIntPipe, Post, Put, Req, UseGuards, ValidationPipe } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, HttpException, HttpStatus, Param, ParseIntPipe, Post, Put, Req, UseGuards, ValidationPipe } from '@nestjs/common';
 import { UserUpdateDto } from '../dto/user/update.dto';
 import { UsersDeleteDto } from '../dto/user/delete.dto';
 import { UserService } from './user.service';
@@ -10,6 +10,7 @@ import { AddUsersToCatsDto } from '../dto/user/add.user.to.cat.dto';
 import { Permissions } from '../decorator/permission.decorator';
 import { Roles } from '../decorator/role.decorator';
 import { AddStudentToClrDto } from '../dto/user/add.student.to.clr.dto';
+import { UserCrEntity } from '../entity/user.cr.entity';
 
 
 @Controller('user')
@@ -28,14 +29,34 @@ export class UserController {
         return this.userService.addUserToCat(addUserToCatDto);
       }
 
+      // @Post('add/stdnt')
+      // @UseGuards(AuthGuard, RoleGuard, PermissionGuard)
+      // @Permissions('add_student')
+      // @Roles(Role.Teacher, Role.SubTeacher)
+      // async addStdntToClr(
+      //   @Body() addData: AddStudentToClrDto, // DTO'yu burada alıyoruz
+      //   @Req() accessToken: string
+      // ){
+      //   return this.userService.addStdntToClr(addData, accessToken);
+      // }
+
       @Post('add/stdnt')
       @UseGuards(AuthGuard, RoleGuard, PermissionGuard)
       @Permissions('add_student')
       @Roles(Role.Teacher, Role.SubTeacher)
       async addStdntToClr(
-        @Body() addData: AddStudentToClrDto,
-        @Req()  accessToken: string
+        @Body() addData: AddStudentToClrDto, // DTO'yu burada alıyoruz
+        @Req() req: Request // Request nesnesini alıyoruz
       ) {
+        // Authorization başlığından accessToken'ı al
+        const authHeader = req.headers['authorization'];
+        const accessToken = authHeader?.replace('Bearer ', '');
+    
+        if (!accessToken) {
+          throw new HttpException('Access token not provided', HttpStatus.UNAUTHORIZED);
+        }
+    
+        // addStdntToClr metodunu çağır
         return this.userService.addStdntToClr(addData, accessToken);
       }
     

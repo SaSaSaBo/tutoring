@@ -4,7 +4,7 @@ export class AddStudentToClrDto {
 
     @IsNotEmpty()
     @IsNumber()
-    studentId: number;
+    userId: number;
 
     @IsNotEmpty()
     @IsNumber()
