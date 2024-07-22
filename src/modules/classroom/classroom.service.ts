@@ -24,9 +24,29 @@ export class ClassroomService {
         private jwtService: JwtService
     ) {}
 
-    async getClassrooms() {
+    async getClassrooms(): Promise<ClassroomEntity[]> {
         return await this.classroomRepository.find();
     }
+
+    // async getClassroomsForTeachs(userId: number): Promise<any> {
+    //     // 2. Kullanıcının oluşturduğu sınıfları filtrele
+    //     const classrooms = await this.classroomRepository.createQueryBuilder('classroom')
+    //         .leftJoinAndSelect('classroom.students', 'student') // Öğrencileri join et
+    //         .where('classroom.creatorId = :userId', { userId }) // Sadece kullanıcının oluşturduğu sınıfları al
+    //         .select(['classroom.id', 'classroom.name', 'COUNT(student.id) AS studentCount'])
+    //         .groupBy('classroom.id')
+    //         .getRawMany();
+
+    //     // 3. Sonuçları döndür
+    //     return classrooms.map(classroom => ({
+    //         id: classroom.classroom_id,
+    //         name: classroom.classroom_name,
+    //         studentCount: Number(classroom.studentcount),
+    //     }));
+    // }
+    // async getClassroomsForStdnt() {
+    //     return await this.classroomRepository.find();
+    // }
 
     async createClassroom(createData: CreateCRDto, accessToken: string): Promise<ClassroomEntity> {
         try {
@@ -92,9 +112,6 @@ export class ClassroomService {
             throw new InternalServerErrorException('Failed to create classroom.', error);
         }
     }
-    
-    
-    
 
     async updateClassroom(id: number, updateData: UpdateCRDto, accessToken: string) {
         try {

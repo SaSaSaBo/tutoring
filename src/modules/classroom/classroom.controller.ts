@@ -19,12 +19,30 @@ export class ClassroomController {
 
     @UseGuards(AuthGuard, RoleGuard, PermissionGuard)
     @Permissions('view_crs', 'view_clrs')
-    @Roles(Role.Manager, Role.Teacher, Role.SubTeacher, Role.Student)
-    @Get()
+    @Roles(Role.Teacher, Role.SubTeacher, Role.Student)
+    @Get('')
     async getClassrooms() {
         console.log('Classrooms Controller Called');
         return this.crService.getClassrooms();
     }
+
+    // @UseGuards(AuthGuard, RoleGuard, PermissionGuard)
+    // @Permissions('view_crs')
+    // @Roles(Role.Teacher, Role.SubTeacher)
+    // @Get('asTeachs')
+    // async getClassroomsForTeachs(@Body() userId: number) {
+    //     console.log('Classrooms Controller Called');
+    //     return this.crService.getClassroomsForTeachs(userId);
+    // }
+
+    // @UseGuards(AuthGuard, RoleGuard, PermissionGuard)
+    // @Permissions('view_clrs')
+    // @Roles(Role.Student)
+    // @Get()
+    // async getClassroomsForStdnt() {
+    //     console.log('Classrooms Controller Called');
+    //     return this.crService.getClassroomsForStdnt();
+    // }
 
     @UseGuards(AuthGuard, RoleGuard, PermissionGuard)
     @Permissions('create_class')
