@@ -9,6 +9,7 @@ import { InfoEntity } from '../info/info.entity';
 import { InfoService } from '../info/info.service';
 import { UsersEntity } from '../user/user.entity';
 import { JwtService } from '@nestjs/jwt';
+import { UserCrEntity } from '../entity/user.cr.entity';
 
 @Injectable()
 export class ClassroomService {
@@ -20,6 +21,9 @@ export class ClassroomService {
         @InjectRepository(UsersEntity) 
         private readonly userRepository: Repository<UsersEntity>,
 
+        @InjectRepository(UserCrEntity)
+        private readonly userCrRepository: Repository<UserCrEntity>,
+
         private infoService: InfoService,
         private jwtService: JwtService
     ) {}
@@ -28,22 +32,20 @@ export class ClassroomService {
         return await this.classroomRepository.find();
     }
 
-    // async getClassroomsForTeachs(userId: number): Promise<any> {
-    //     // 2. Kullanıcının oluşturduğu sınıfları filtrele
-    //     const classrooms = await this.classroomRepository.createQueryBuilder('classroom')
-    //         .leftJoinAndSelect('classroom.students', 'student') // Öğrencileri join et
-    //         .where('classroom.creatorId = :userId', { userId }) // Sadece kullanıcının oluşturduğu sınıfları al
-    //         .select(['classroom.id', 'classroom.name', 'COUNT(student.id) AS studentCount'])
-    //         .groupBy('classroom.id')
-    //         .getRawMany();
-
-    //     // 3. Sonuçları döndür
-    //     return classrooms.map(classroom => ({
-    //         id: classroom.classroom_id,
-    //         name: classroom.classroom_name,
-    //         studentCount: Number(classroom.studentcount),
-    //     }));
-    // }
+    async getClassroomsForTeachs(userId: number) {
+        try {
+            return await this.userCrRepository
+            .createQueryBuilder('userCr')
+            .innerJoinAndSelect('userCr.user', 'user')
+            .innerJoinAndSelect('userCr.classroom', 'classroom')
+            .where('userCr.addedBy = :userId', { userId })
+            .getMany();
+        
+        } catch (error) {
+            console.error('Error decoding token:', error);
+            throw new Error('Failed to decode token');
+        }
+    }
 
     async getClassroomsForStdnt() {
         return await this.classroomRepository.find({
