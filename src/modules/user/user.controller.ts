@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Delete, HttpException, HttpStatus, Param, ParseIntPipe, Post, Put, Req, UseGuards, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, ParseIntPipe, Post, Put, Req, UseGuards, ValidationPipe } from '@nestjs/common';
 import { UserUpdateDto } from '../dto/user/update.dto';
 import { UsersDeleteDto } from '../dto/user/delete.dto';
 import { UserService } from './user.service';
@@ -10,7 +10,6 @@ import { AddUsersToCatsDto } from '../dto/user/add.user.to.cat.dto';
 import { Permissions } from '../decorator/permission.decorator';
 import { Roles } from '../decorator/role.decorator';
 import { AddStudentToClrDto } from '../dto/user/add.student.to.clr.dto';
-import { UserCrEntity } from '../entity/user.cr.entity';
 
 
 @Controller('user')
@@ -19,7 +18,31 @@ export class UserController {
     constructor(
         private userService: UserService,
       ) {}
-    
+
+      @Get('all')
+      @UseGuards(AuthGuard, RoleGuard, PermissionGuard)
+      @Permissions('view_users')
+      @Roles(Role.Manager)
+      async findAll (@Req() accessToken: string) {
+        return this.userService.findAll(accessToken);
+      }
+
+      @Get('sub-teachers')
+      @UseGuards(AuthGuard, RoleGuard, PermissionGuard)
+      @Permissions('view_students')
+      @Roles(Role.Teacher, Role.SubTeacher)
+      async findAllStudents () {
+        return this.userService.findAllStudents();
+      }
+
+      @Get('students')
+      @UseGuards(AuthGuard, RoleGuard, PermissionGuard)
+      @Permissions('view_sub__teachers')
+      @Roles(Role.Student)
+      async findAllSubTeachers () {
+        return this.userService.findAllSubTeachers();
+      }
+
       @Post('add')
       @UseGuards(AuthGuard, RoleGuard, PermissionGuard)
       @Permissions('add_users_to_cat')

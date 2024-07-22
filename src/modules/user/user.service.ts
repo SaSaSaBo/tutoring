@@ -10,7 +10,7 @@ import {
   } from '@nestjs/common';
 import { UsersEntity } from './user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Not, Repository } from 'typeorm';
 import { CategoryEntity } from '../category/category.entity';
 import * as bcrypt from 'bcrypt';
 import { InfoService } from '../info/info.service';
@@ -52,6 +52,94 @@ export class UserService {
     private infoService: InfoService,
     private passwordService:  PasswordService,
   ) {}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  async findAll(accessToken: string): Promise<UsersEntity[]> {
+    const decodedToken = this.jwtService.verify(accessToken);
+    const userId = decodedToken.sub;
+
+    // Manager kullanıcısının açtığı kategorileri bul
+    const managerCategories = await this.cRepository.find({
+      where: { createdBy: { id: userId } },
+    });
+
+    const managerCategoryIds = managerCategories.map(category => category.id);
+
+    // Bu kategorilerde bulunan teacher ve sub_teacher kullanıcılarını bul
+    const teacherAndSubTeachers = await this.usersRepository.find({
+      where: {
+        roles: In([Role.Teacher, Role.SubTeacher]),
+        categories: { id: In(managerCategoryIds) },
+      },
+    });
+
+    const teacherAndSubTeacherIds = teacherAndSubTeachers.map(user => user.id);
+
+    // Bu teacher ve sub_teacher kullanıcılarının açtığı sınıfları bul
+    const classes = await this.classroomRepository.find({
+      where: { creator: { id: In(teacherAndSubTeacherIds) } },
+    });
+
+    const classIds = classes.map(classEntity => classEntity.id);
+
+    // Bu sınıflarda bulunan student kullanıcılarını bul
+    const students = await this.usersRepository.find({
+      where: {
+        roles: Role.Student,
+        classrooms: { id: In(classIds) },
+      },
+    });
+
+    return [...teacherAndSubTeachers, ...students];
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  async findAllStudents(): Promise<UsersEntity[]> {
+      return this.usersRepository.find({ where: { roles: Role.Student } });
+  }
+
+  async findAllSubTeachers(): Promise<UsersEntity[]> {
+    return this.usersRepository.find({
+      where: {
+        roles: IN([Role.Teacher, Role.SubTeacher]),
+      },
+    });
+  }
 
   async findOne(username: string): Promise<UsersEntity | undefined> {
       return this.usersRepository.findOne({ where: { username } });
@@ -303,3 +391,11 @@ export class UserService {
   }
 
 }
+
+function IN(arg0: Role[]): Role | import("typeorm").FindOperator<Role> {
+  throw new Error('Function not implemented.');
+}
+function NOT(arg0: Role[]): import("typeorm").FindOptionsWhere<UsersEntity> | import("typeorm").FindOptionsWhere<UsersEntity>[] {
+  throw new Error('Function not implemented.');
+}
+

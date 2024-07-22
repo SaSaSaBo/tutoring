@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { AddCategoryDto } from '../dto/category/add.dto';
 import { UpdateCategoryDto } from '../dto/category/update.dto';
@@ -29,8 +29,13 @@ export class CategoryController {
     @Permissions('add_cat')
     @Roles(Role.Manager)
     @Post('add')
-    async addCategories(@Body() addData: AddCategoryDto) {
-        const category = await this.categoryService.addCategories(addData);
+    async addCategories(
+        @Body() addData: AddCategoryDto,
+        @Req() req
+    ) {
+        console.log('Request Body:', addData);
+        const userId = req.user.id;
+        const category = await this.categoryService.addCategories(addData, userId);
         return {
             success: true,
             data: {

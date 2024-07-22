@@ -1,38 +1,41 @@
-import { BeforeInsert, Column, DeleteDateColumn, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { BeforeInsert, Column, DeleteDateColumn, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { UsersEntity } from '../user/user.entity';
 
 @Entity('categorys')
 export class CategoryEntity {
 
-    @PrimaryGeneratedColumn()
-    id: number;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @Column({ length: 100 })
-    name: string;
+  @Column({ length: 100 })
+  name: string;
 
-    @Column('text')
-    definement: string;
+  @Column('text')
+  definement: string;
 
-    @Column({ default: true })
-    status: boolean;
+  @Column({ default: true })
+  status: boolean;
 
-    @ManyToOne(() => CategoryEntity, category => category.childCategories, { nullable: true })
-    parent: CategoryEntity;    
-    @OneToMany(() => CategoryEntity, category => category.parent)
-    childCategories: CategoryEntity[];
+  @ManyToOne(() => CategoryEntity, category => category.childCategories, { nullable: true })
+  parent: CategoryEntity;    
+  @OneToMany(() => CategoryEntity, category => category.parent)
+  childCategories: CategoryEntity[];
     
-    @DeleteDateColumn({
-        name: 'deleted_at',
-        type: 'timestamp',
-        nullable: true,
-        default: null,
-    })
-    deletedAt: Date;
+  @DeleteDateColumn({
+      name: 'deleted_at',
+      type: 'timestamp',
+      nullable: true,
+      default: null,
+  })
+  deletedAt: Date;
   
   @ManyToMany(() => UsersEntity, user => user.categories)
-  users: UsersEntity
-  
+  users: UsersEntity;
 
+  @ManyToOne(() => UsersEntity, user => user.createdCategories)
+  @JoinColumn({ name: 'createdBy' })
+  createdBy: UsersEntity;
+  
   @BeforeInsert()
   setDefaultParent() {
     if (this.status === undefined) {

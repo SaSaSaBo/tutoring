@@ -7,6 +7,7 @@ import { TransactionEntity } from '../transaction/transaction.entity';
 import { DeleteCategoryDto } from '../dto/category/delete.dto';
 import { TransactionService } from '../transaction/transaction.service';
 import { CategoryEntity } from './category.entity';
+import { UsersEntity } from '../user/user.entity';
 
 @Injectable()
 export class CategoryService {
@@ -14,6 +15,9 @@ export class CategoryService {
     constructor(
         @InjectRepository(CategoryEntity) 
         private readonly catRepository: Repository<CategoryEntity>,
+
+        @InjectRepository(UsersEntity)
+        private readonly userRepository: Repository<UsersEntity>,
 
         private transactionService: TransactionService
     ) {}
@@ -23,7 +27,7 @@ export class CategoryService {
         return await this.catRepository.find({ relations: ['parent'] });
     }    
     
-    async addCategories(addData: AddCategoryDto): Promise<CategoryEntity> {
+    async addCategories(addData: AddCategoryDto, userId: number): Promise<CategoryEntity> {
         const { name, definement, status, parentId } = addData;
 
         const category = new CategoryEntity();
@@ -31,6 +35,10 @@ export class CategoryService {
         category.definement = definement;
         category.status = status !== undefined ? status : true;
         category.parent = parentId ? await this.catRepository.findOneBy({ id: parentId }) : null;
+
+        // Kullanıcıyı repository'den bul ve createdBy alanını doldur
+        const user = await this.userRepository.findOneBy({ id: userId });
+        category.createdBy = user;
 
         return await this.catRepository.save(category);
     }

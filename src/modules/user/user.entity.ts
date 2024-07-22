@@ -58,5 +58,6 @@ export class UsersEntity extends BaseEntity {
   parent: any
   name: any
   cat_user: any;
+  createdCategories: any;
 
 }

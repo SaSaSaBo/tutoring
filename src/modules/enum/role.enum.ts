@@ -18,8 +18,7 @@ export const roles = {
             'update_cat'
     ],
     teacher: [
-        'view_users', 
-        'view_cats',
+        'view_students', 
         'view_crs',
         'add_student',
         'create_class',
@@ -27,8 +26,7 @@ export const roles = {
         'delete_class'
     ],
     sub_teacher: [
-        'view_users', 
-        'view_cats',
+        'view_students', 
         'view_crs',
         'add_student',
         'create_class',
@@ -37,7 +35,7 @@ export const roles = {
     ],
     student: [
         'view_clrs',
-        'view_user',
+        'view_sub__teachers',
         'update_own_profile'
     ],
 };
