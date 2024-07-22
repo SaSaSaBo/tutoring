@@ -30,39 +30,71 @@ export class ClassroomService {
 
     async createClassroom(createData: CreateCRDto, accessToken: string): Promise<ClassroomEntity> {
         try {
+            console.log('AccessToken: ', accessToken);
+    
             // Decode accessToken to get user information
             const decodedToken = this.jwtService.decode(accessToken);
             console.log('DecodedToken: ', decodedToken);
-
+    
+            if (!decodedToken || typeof decodedToken !== 'object') {
+                throw new UnauthorizedException('Invalid access token.');
+            }
+    
             // Fetch user from database with categories loaded
+            console.log('Fetching user from database...');
             const user = await this.userRepository.findOne({
                 where: { username: decodedToken.username },
                 relations: ['categories'], // Load categories relationship
             });
-
+    
             if (!user) {
+                console.error('User not found.');
                 throw new NotFoundException('User not found.');
             }
-
+    
+            console.log('User found: ', user);
+    
             // Check if user has any categories that allow classroom creation
             const canCreateClassroom = user.categories.length > 0;
-
+            console.log('Can create classroom: ', canCreateClassroom);
+    
             if (!canCreateClassroom) {
                 throw new UnauthorizedException('User is not authorized to create classrooms.');
             }
-
+    
+            // Validate that categoryId is provided
+            if (!createData.categoryId) {
+                throw new BadRequestException('categoryId is required.');
+            }
+    
+            // Check if the user is associated with the given categoryId
+            console.log('Checking user categories for categoryId: ', createData.categoryId);
+            const category = user.categories.find(cat => cat.id === createData.categoryId);
+            console.log('Category found: ', category);
+    
+            if (!category) {
+                console.error('User is not authorized for the specified category.');
+                throw new UnauthorizedException('User is not authorized to create classrooms in the specified category.');
+            }
+    
             // Create new classroom entity
             const classroom = new ClassroomEntity();
             classroom.cr_name = createData.cr_name;
             classroom.capability = createData.capability;
-            classroom.creator = decodedToken.sub;
-
+            classroom.creator = user; // Correctly set the creator relation
+            classroom.category = category; // Correctly set the category relation
+    
             // Save classroom to database
+            console.log('Saving classroom to database...');
             return await this.classroomRepository.save(classroom);
         } catch (error) {
+            console.error('Error creating classroom: ', error.message);
             throw new InternalServerErrorException('Failed to create classroom.', error);
         }
     }
+    
+    
+    
 
     async updateClassroom(id: number, updateData: UpdateCRDto, accessToken: string) {
         try {

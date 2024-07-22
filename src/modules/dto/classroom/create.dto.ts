@@ -1,4 +1,4 @@
-import { IsNumber, IsString } from "class-validator";
+import { IsNumber, IsOptional, IsString } from "class-validator";
 import { ClassroomEntity } from "src/modules/classroom/classroom.entity";
 
 export class CreateCRDto {
@@ -9,13 +9,14 @@ export class CreateCRDto {
     @IsNumber()
     capability: number;
 
+    @IsOptional()
+    @IsNumber()
+    categoryId?: number; // Change to number type
+
     toEntity(): ClassroomEntity {
         const classroom = new ClassroomEntity();
         classroom.cr_name = this.cr_name;
         classroom.capability = this.capability;
         return classroom;
     }
-
-    categoryId: any
-
 }
