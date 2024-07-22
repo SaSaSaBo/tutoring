@@ -28,10 +28,6 @@ export class ClassroomService {
         private jwtService: JwtService
     ) {}
 
-    async getClassrooms(): Promise<ClassroomEntity[]> {
-        return await this.classroomRepository.find();
-    }
-
     async getClassroomsForTeachs(userId: number) {
         try {
             return await this.userCrRepository

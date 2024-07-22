@@ -18,15 +18,6 @@ export class ClassroomController {
     ) {}
 
     @UseGuards(AuthGuard, RoleGuard, PermissionGuard)
-    @Permissions('view_crs', 'view_clrs')
-    @Roles(Role.Teacher, Role.SubTeacher, Role.Student)
-    @Get('')
-    async getClassrooms() {
-        console.log('Classrooms Controller Called');
-        return this.crService.getClassrooms();
-    }
-
-    @UseGuards(AuthGuard, RoleGuard, PermissionGuard)
     @Permissions('view_crs')
     @Roles(Role.Teacher, Role.SubTeacher)
     @Get('asTeachs')
