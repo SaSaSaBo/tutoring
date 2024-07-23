@@ -16,6 +16,10 @@ import { InOutService } from '../in-out/in-out.service';
 import { UserService } from '../user/user.service';
 import { PasswordService } from '../service/password.service';
 import { UserCrEntity } from '../entity/user.cr.entity';
+import { ConnectionEntity } from '../connection/connection.entity';
+import { MessageEntity } from '../messages/messages.entity';
+import { MessageService } from '../messages/messages.service';
+import { ConnectionService } from '../connection/connection.service';
 
 @Module({
   imports: [
@@ -27,6 +31,8 @@ import { UserCrEntity } from '../entity/user.cr.entity';
       TransactionEntity,
       InOutEntity,
       UserCrEntity,
+      ConnectionEntity,
+      MessageEntity,
     ])
   ],
   providers: [
@@ -38,6 +44,8 @@ import { UserCrEntity } from '../entity/user.cr.entity';
     InOutService,
     UserService,
     PasswordService,
+    MessageService,
+    ConnectionService,
   ],
   controllers: [ClassroomController]
 })

@@ -17,6 +17,10 @@ import { AuthService } from '../auth/auth.service';
 import { InOutEntity } from '../in-out/in-out.entity';
 import { UserCrEntity } from '../entity/user.cr.entity';
 import { ClassroomEntity } from '../classroom/classroom.entity';
+import { ConnectionEntity } from '../connection/connection.entity';
+import { MessageEntity } from '../messages/messages.entity';
+import { MessageService } from '../messages/messages.service';
+import { ConnectionService } from '../connection/connection.service';
 @Module({
   imports: [
     TypeOrmModule.forFeature([ 
@@ -27,6 +31,8 @@ import { ClassroomEntity } from '../classroom/classroom.entity';
       InOutEntity,
       UserCrEntity,
       ClassroomEntity,
+      MessageEntity,
+      ConnectionEntity,
     ]),
   ],
   controllers: [CategoryController],
@@ -39,7 +45,9 @@ import { ClassroomEntity } from '../classroom/classroom.entity';
     InOutService,
     PasswordService,
     AuthService,
-    AuthenticationService
+    AuthenticationService,
+    MessageService,
+    ConnectionService,
   ]
 })
 export class CategoryModule {}

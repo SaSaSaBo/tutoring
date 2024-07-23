@@ -25,6 +25,12 @@ import { ClassroomModule } from './modules/classroom/classroom.module';
 import { ClassroomService } from './modules/classroom/classroom.service';
 import { ClassroomEntity } from './modules/classroom/classroom.entity';
 import { UserCrEntity } from './modules/entity/user.cr.entity';
+import { ConnectionModule } from './modules/connection/connection.module';
+import { MessageEntity } from './modules/messages/messages.entity';
+import { MessagesModule } from './modules/messages/messages.module';
+import { ConnectionEntity } from './modules/connection/connection.entity';
+import { MessageService } from './modules/messages/messages.service';
+import { ConnectionService } from './modules/connection/connection.service';
 
 @Module({
   imports: [
@@ -40,6 +46,8 @@ import { UserCrEntity } from './modules/entity/user.cr.entity';
       InfoEntity,
       ClassroomEntity,
       UserCrEntity,
+      MessageEntity,
+      ConnectionEntity,
     ]),
     CategoryModule, 
     TransactionModule, 
@@ -48,6 +56,8 @@ import { UserCrEntity } from './modules/entity/user.cr.entity';
     InOutModule, 
     AuthModule,
     ClassroomModule,
+    ConnectionModule,
+    MessagesModule,
   ],
   controllers: [AppController],
   providers: [
@@ -59,8 +69,11 @@ import { UserCrEntity } from './modules/entity/user.cr.entity';
     UserService,
     InfoService,
     ClassroomService,
+    MessageService,
+    ConnectionService,
   ],
 })
+
 export class AppModule {
   configure(consumer: MiddlewareConsumer){
     consumer

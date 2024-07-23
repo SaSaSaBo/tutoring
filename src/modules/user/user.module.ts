@@ -17,6 +17,10 @@ import { AuthService } from '../auth/auth.service';
 import { InOutEntity } from '../in-out/in-out.entity';
 import { UserCrEntity } from '../entity/user.cr.entity';
 import { ClassroomEntity } from '../classroom/classroom.entity';
+import { MessageEntity } from '../messages/messages.entity';
+import { ConnectionEntity } from '../connection/connection.entity';
+import { MessageService } from '../messages/messages.service';
+import { ConnectionService } from '../connection/connection.service';
 
 @Module({
   imports: [
@@ -27,7 +31,9 @@ import { ClassroomEntity } from '../classroom/classroom.entity';
       InfoEntity,
       InOutEntity,
       UserCrEntity,
-      ClassroomEntity
+      ClassroomEntity,
+      MessageEntity,
+      ConnectionEntity,
     ])
   ],
   controllers: [UserController],
@@ -40,7 +46,9 @@ import { ClassroomEntity } from '../classroom/classroom.entity';
     PasswordService,
     JwtService,
     AuthenticationService,
-    AuthService
+    AuthService,
+    MessageService,
+    ConnectionService,
   ],
 })
 export class UserModule {}
