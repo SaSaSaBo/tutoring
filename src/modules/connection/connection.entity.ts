@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn, DeleteDateColumn } from 'typeorm';
 import { UsersEntity } from '../user/user.entity';
 
 @Entity('connection')
@@ -12,13 +12,21 @@ export class ConnectionEntity {
   @ManyToOne(() => UsersEntity)
   requestee: UsersEntity;
 
-  @Column({ type: 'text'})
+  @Column({ type: 'text', nullable: true })
   pre_message: string;
 
-  @Column({ default: false })
+  @Column({ default: false, nullable: true })
   accepted: boolean;
 
   @CreateDateColumn()
   createDate: Date;
+
+  @DeleteDateColumn({
+    name: 'deleted_at',
+    type: 'timestamp',
+    nullable: true,
+    default: null,
+  })
+  deletedAt: Date;
 
 }

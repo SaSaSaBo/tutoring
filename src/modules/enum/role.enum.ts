@@ -23,19 +23,33 @@ export const roles = {
         'add_student',
         'create_class',
         'update_class',
-        'delete_class'
-    ],
+        'delete_class',
+        'accept_connection_request',
+        'send_message',
+        'send_invite_request',
+        'delete_message',
+        ],
     sub_teacher: [
         'view_students', 
         'view_crs',
         'add_student',
         'create_class',
         'update_class',
-        'delete_class'
+        'delete_class',
+        'accept_connection_request',
+        'send_message',
+        'send_invite_request',
+        'delete_message',
     ],
     student: [
         'view_clrs',
         'view_sub__teachers',
-        'update_own_profile'
+        'update_own_profile',
+        'send_connection_request',
+        'accept_connection_request',
+        'send_message',
+        'send_join_request',
+        'delete_message',
+        'regret_connection',
     ],
 };

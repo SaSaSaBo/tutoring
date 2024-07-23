@@ -12,6 +12,11 @@ import { ClassroomEntity } from '../classroom/classroom.entity';
 import { InfoService } from '../info/info.service';
 import { PasswordService } from '../service/password.service';
 import { InfoEntity } from '../info/info.entity';
+import { AuthService } from '../auth/auth.service';
+import { InOutService } from '../in-out/in-out.service';
+import { CategoryService } from '../category/category.service';
+import { TransactionService } from '../transaction/transaction.service';
+import { TransactionEntity } from '../transaction/transaction.entity';
 
 @Module({
   imports: [
@@ -23,6 +28,7 @@ import { InfoEntity } from '../info/info.entity';
       UserCrEntity,
       ClassroomEntity,
       InfoEntity,
+      TransactionEntity,
     ])
   ],
   controllers: [ConnectionController],
@@ -32,6 +38,10 @@ import { InfoEntity } from '../info/info.entity';
     InfoService,
     PasswordService,
     UserService,
+    AuthService,
+    InOutService,
+    CategoryService,
+    TransactionService,
   ]
 })
 export class ConnectionModule {}
