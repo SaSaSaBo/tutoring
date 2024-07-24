@@ -31,6 +31,8 @@ import { MessagesModule } from './modules/messages/messages.module';
 import { ConnectionEntity } from './modules/connection/connection.entity';
 import { MessageService } from './modules/messages/messages.service';
 import { ConnectionService } from './modules/connection/connection.service';
+import { RequestModule } from './modules/request/request.module';
+import { RequestEntity } from './modules/request/request.entity';
 
 @Module({
   imports: [
@@ -48,6 +50,7 @@ import { ConnectionService } from './modules/connection/connection.service';
       UserCrEntity,
       MessageEntity,
       ConnectionEntity,
+      RequestEntity,
     ]),
     CategoryModule, 
     TransactionModule, 
@@ -58,6 +61,7 @@ import { ConnectionService } from './modules/connection/connection.service';
     ClassroomModule,
     ConnectionModule,
     MessagesModule,
+    RequestModule,
   ],
   controllers: [AppController],
   providers: [

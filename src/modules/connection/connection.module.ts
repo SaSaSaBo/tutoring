@@ -17,6 +17,7 @@ import { InOutService } from '../in-out/in-out.service';
 import { CategoryService } from '../category/category.service';
 import { TransactionService } from '../transaction/transaction.service';
 import { TransactionEntity } from '../transaction/transaction.entity';
+import { RequestEntity } from '../request/request.entity';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { TransactionEntity } from '../transaction/transaction.entity';
       ClassroomEntity,
       InfoEntity,
       TransactionEntity,
+      RequestEntity,
     ])
   ],
   controllers: [ConnectionController],

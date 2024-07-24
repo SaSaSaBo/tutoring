@@ -1,22 +1,22 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ConnectionEntity } from './connection.entity';
 import { UsersEntity } from '../user/user.entity';
 import { SendConnectionDto } from '../dto/connection/send.dto';
 import { AcceptConnectionDto } from '../dto/connection/accept.dto';
 import { DeleteConnectionDto } from '../dto/connection/delete.dto';
+import { RequestEntity } from './request.entity';
 
 @Injectable()
-export class ConnectionService {
+export class RequestService {
   constructor(
-    @InjectRepository(ConnectionEntity)
-    private connectionRepository: Repository<ConnectionEntity>,
+    @InjectRepository(RequestEntity)
+    private reqRepository: Repository<RequestEntity>,
   ) {}
 
-  async sendConnection(requester: UsersEntity, requestee: UsersEntity, sendData: SendConnectionDto): Promise<ConnectionEntity> {
+  async sendRequest(requester: UsersEntity, requestee: UsersEntity): Promise<RequestEntity> {
     // Check if an existing connection request exists between requester and requestee
-    const existingConnection = await this.connectionRepository.findOne({
+    const existingConnection = await this.reqRepository.findOne({
       where: [
         { requester: { id: requester.id }, requestee: { id: requestee.id }, deletedAt: null },
         { requester: { id: requestee.id }, requestee: { id: requester.id }, deletedAt: null }
@@ -29,23 +29,16 @@ export class ConnectionService {
     }
   
     // Create a new connection request
-    const connection = this.connectionRepository.create({ requester, requestee });
-  
-    const { pre_message } = sendData;
+    const connection = this.reqRepository.create({ requester, requestee });
   
     console.log('Connection: ', connection);
-    console.log('PreMessage: ', pre_message);
-  
-    if (pre_message) {
-      connection.pre_message = pre_message;
-    }
     
-    return this.connectionRepository.save(connection);
+    return this.reqRepository.save(connection);
   }
   
 
-  async acceptConnection(requesteeId: UsersEntity, requesterId: UsersEntity, acceptData: AcceptConnectionDto): Promise<ConnectionEntity> {        
-    const connection = await this.connectionRepository.findOne({
+  async acceptRequest(requesteeId: UsersEntity, requesterId: UsersEntity, acceptData: AcceptConnectionDto): Promise<RequestEntity> {        
+    const connection = await this.reqRepository.findOne({
       where: {
         requester: { id: requesterId.id },
         requestee: { id: requesteeId.id },
@@ -59,15 +52,15 @@ export class ConnectionService {
     console.log('Connection: ', connection);
   
     connection.accepted = acceptData.accepted;
-    await this.connectionRepository.save(connection);
+    await this.reqRepository.save(connection);
   
     return connection;
   }
 
-  async deleteConnection(requestee: UsersEntity, requester: UsersEntity, deleteData: DeleteConnectionDto): Promise<ConnectionEntity> {
+  async deleteRequest(requestee: UsersEntity, requester: UsersEntity, deleteData: DeleteConnectionDto): Promise<RequestEntity> {
     console.log(`Requester ID: ${requester.id}, Requestee ID: ${requestee.id}`);
     
-    const connection = await this.connectionRepository.findOne({
+    const connection = await this.reqRepository.findOne({
       where: [
         { requester: { id: requester.id }, requestee: { id: requestee.id }, deletedAt: null },
         { requester: { id: requestee.id }, requestee: { id: requester.id }, deletedAt: null }
@@ -81,9 +74,9 @@ export class ConnectionService {
     console.log('Connection: ', connection);
     if (deleteData.softDelete) {
       connection.deletedAt = new Date();
-      await this.connectionRepository.save(connection);
+      await this.reqRepository.save(connection);
     } else {
-      await this.connectionRepository.remove(connection);
+      await this.reqRepository.remove(connection);
     }
   
     return connection;

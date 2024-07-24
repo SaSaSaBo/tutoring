@@ -21,6 +21,7 @@ import { ConnectionEntity } from '../connection/connection.entity';
 import { MessageEntity } from '../messages/messages.entity';
 import { MessageService } from '../messages/messages.service';
 import { ConnectionService } from '../connection/connection.service';
+import { RequestEntity } from '../request/request.entity';
 @Module({
   imports: [
     TypeOrmModule.forFeature([ 
@@ -33,6 +34,7 @@ import { ConnectionService } from '../connection/connection.service';
       ClassroomEntity,
       MessageEntity,
       ConnectionEntity,
+      RequestEntity,
     ]),
   ],
   controllers: [CategoryController],

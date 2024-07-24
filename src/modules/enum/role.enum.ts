@@ -28,6 +28,8 @@ export const roles = {
         'send_message',
         'send_invite_request',
         'delete_message',
+        'cancel_request',
+        'send_request',
         ],
     sub_teacher: [
         'view_students', 
@@ -40,6 +42,8 @@ export const roles = {
         'send_message',
         'send_invite_request',
         'delete_message',
+        'cancel_request',
+        'send_request',
     ],
     student: [
         'view_clrs',
@@ -50,6 +54,7 @@ export const roles = {
         'send_message',
         'send_join_request',
         'delete_message',
-        'regret_connection',
+        'cancel_connection',
+        'accept_request',
     ],
 };

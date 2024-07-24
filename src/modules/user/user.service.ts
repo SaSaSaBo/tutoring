@@ -1,12 +1,10 @@
 import {
     BadRequestException,
-    ForbiddenException,
     HttpException,
     HttpStatus,
     Injectable,
     InternalServerErrorException,
     NotFoundException,
-    UnauthorizedException,
   } from '@nestjs/common';
 import { UsersEntity } from './user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -25,7 +23,7 @@ import { Role } from '../enum/role.enum';
 import { AddStudentToClrDto } from '../dto/user/add.student.to.clr.dto';
 import { JwtService } from '@nestjs/jwt';
 import { UserCrEntity } from '../entity/user.cr.entity';
-import { AnyARecord } from 'dns';
+import { RequestEntity } from '../request/request.entity';
 
 @Injectable()
 export class UserService {
@@ -48,6 +46,9 @@ export class UserService {
 
     @InjectRepository(ClassroomEntity)
     private classroomRepository: Repository<ClassroomEntity>,
+
+    @InjectRepository(RequestEntity)
+    private requestRepository: Repository<RequestEntity>,
   
     private jwtService: JwtService,
     private infoService: InfoService,
@@ -223,7 +224,7 @@ export class UserService {
   async findAllSubTeachers(): Promise<UsersEntity[]> {
     return this.usersRepository.find({
       where: {
-        roles: IN([Role.Teacher, Role.SubTeacher]),
+        roles: In([Role.Teacher, Role.SubTeacher]),
       },
     });
   }
@@ -308,32 +309,69 @@ export class UserService {
     // JWT'den kullanıcı kimliğini al
     const decodedToken = this.jwtService.decode(accessToken) as { sub: number };
     const addedBy = decodedToken.sub;
-
+  
     const { userId, classroomId } = addStudentToClrDto;
-
+  
     try {
       // Kullanıcıyı ve sınıfı bul
       const user = await this.usersRepository.findOne({ where: { id: userId } });
       const classroom = await this.classroomRepository.findOne({ where: { id: classroomId } });
-
+  
       if (!user || !classroom) {
         throw new HttpException(
-          'Kullanıcı veya sınıf bulunamadı',
+          'User or class not found',
           HttpStatus.NOT_FOUND
         );
       }
-
+  
+      // requestRepository'de accepted = true ve kullanıcı için geçerli bir istek olup olmadığını kontrol et
+      const existingRequest = await this.requestRepository.findOne({ 
+        where: { 
+          requester: { id: addedBy }, 
+          requestee: user,
+          accepted: true
+        }
+      });
+  
+      if (!existingRequest) {
+        throw new HttpException(
+          'There is no request to add this user to the class or your request was not accepted.',
+          HttpStatus.FORBIDDEN
+        );
+      }
+  
+      // Kullanıcının zaten sınıfta olup olmadığını kontrol et
+      const existingUserCr = await this.userCrRepository.findOne({
+        where: {
+          user: user,
+          classroom: classroom
+        }
+      });
+  
+      if (existingUserCr) {
+        throw new HttpException(
+          'This user is already added to the class.',
+          HttpStatus.CONFLICT
+        );
+      }
+  
       // UserCrEntity nesnesini oluşturarak kaydediyoruz
       const userCrEntity = this.userCrRepository.create({
         user: user,
         classroom: classroom,
-        addedBy:{id:addedBy}
-      }); 
-
+        addedBy: { id: addedBy }
+      });
+  
+      console.log('Decoded Token:', decodedToken);
+      console.log('User:', user);
+      console.log('Classroom:', classroom);
+      console.log('Existing Request:', existingRequest);
+  
       await this.userCrRepository.save(userCrEntity);
     } catch (error) {
+      console.error('Error adding student to class:', error); // Daha detaylı hata günlüğü
       throw new HttpException(
-        'Öğrenci sınıfa eklenirken bir hata oluştu',
+        'An error occurred while adding the student to the class.',
         HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
@@ -478,11 +516,3 @@ export class UserService {
   }
 
 }
-
-function IN(arg0: Role[]): Role | import("typeorm").FindOperator<Role> {
-  throw new Error('Function not implemented.');
-}
-function NOT(arg0: Role[]): import("typeorm").FindOptionsWhere<UsersEntity> | import("typeorm").FindOptionsWhere<UsersEntity>[] {
-  throw new Error('Function not implemented.');
-}
-

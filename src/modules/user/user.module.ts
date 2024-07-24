@@ -21,6 +21,7 @@ import { MessageEntity } from '../messages/messages.entity';
 import { ConnectionEntity } from '../connection/connection.entity';
 import { MessageService } from '../messages/messages.service';
 import { ConnectionService } from '../connection/connection.service';
+import { RequestEntity } from '../request/request.entity';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { ConnectionService } from '../connection/connection.service';
       ClassroomEntity,
       MessageEntity,
       ConnectionEntity,
+      RequestEntity,
     ])
   ],
   controllers: [UserController],

@@ -20,6 +20,7 @@ import { ConnectionEntity } from '../connection/connection.entity';
 import { MessageEntity } from '../messages/messages.entity';
 import { MessageService } from '../messages/messages.service';
 import { ConnectionService } from '../connection/connection.service';
+import { RequestEntity } from '../request/request.entity';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { ConnectionService } from '../connection/connection.service';
       UserCrEntity,
       ConnectionEntity,
       MessageEntity,
+      RequestEntity,
     ])
   ],
   providers: [

@@ -17,8 +17,7 @@ import { TransactionService } from '../transaction/transaction.service';
 import { TransactionEntity } from '../transaction/transaction.entity';
 import { UserCrEntity } from '../entity/user.cr.entity';
 import { ClassroomEntity } from '../classroom/classroom.entity';
-import { ConnectionEntity } from '../connection/connection.entity';
-import { MessageEntity } from '../messages/messages.entity';
+import { RequestEntity } from '../request/request.entity';
 
 @Module({
   imports: [
@@ -31,7 +30,7 @@ import { MessageEntity } from '../messages/messages.entity';
       TransactionEntity,
       UserCrEntity,
       ClassroomEntity,
-
+      RequestEntity,
     ]),
     JwtModule.register({
       global: true,
