@@ -343,8 +343,8 @@ export class UserService {
       // Kullanıcının zaten sınıfta olup olmadığını kontrol et
       const existingUserCr = await this.userCrRepository.findOne({
         where: {
-          user: user,
-          classroom: classroom
+          user: { id: userId },
+          classroom: { id: classroomId }
         }
       });
   
@@ -375,7 +375,7 @@ export class UserService {
         HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
-  }
+  }  
 
   private hasTeacherOrSubTeacherRole(roles: Role[]): boolean {
     return roles.some(role => [Role.Teacher, Role.SubTeacher].includes(role));
