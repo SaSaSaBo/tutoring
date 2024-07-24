@@ -6,6 +6,7 @@ import { MessageEntity } from './messages.entity';
 import { ConnectionEntity } from '../connection/connection.entity';
 import { Role } from '../enum/role.enum';
 import { DeleteMessageDto } from '../dto/message/delete.dto';
+import { BlockEntity } from '../block/block.entity';
 
 @Injectable()
 export class MessageService {
@@ -15,9 +16,29 @@ export class MessageService {
 
     @InjectRepository(ConnectionEntity)
     private connectionRepository: Repository<ConnectionEntity>,
+
+    @InjectRepository(BlockEntity)
+    private blockRepository: Repository<BlockEntity>,
+    
   ) {}
 
   async sendMessage(sender: UsersEntity, receiver: UsersEntity, content: string): Promise<MessageEntity> {
+    // Bloklama kontrolü
+    const block = await this.blockRepository.findOne({
+      where: [
+        { blocker: { id: sender.id }, blocked: { id: receiver.id }, unblockedDate: null },
+        { blocker: { id: receiver.id }, blocked: { id: sender.id }, unblockedDate: null },
+      ],
+    });
+
+    console.log('block:', block); // Debug: Bloklama verilerini kontrol et
+
+    // Eğer bloklama varsa ve unblockedDate null ise hata fırlat
+    if (!block) {
+      throw new ForbiddenException('Your not able to send message. One of the users is blocked.');
+    }
+
+    // Bağlantı kontrolü
     const connection = await this.connectionRepository.findOne({
       where: [
         { requester: sender, requestee: receiver },

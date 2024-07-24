@@ -30,7 +30,9 @@ export const roles = {
         'delete_message',
         'cancel_request',
         'send_request',
-        ],
+        'block_user',
+        'unblock_user',
+    ],
     sub_teacher: [
         'view_students', 
         'view_crs',
@@ -44,6 +46,8 @@ export const roles = {
         'delete_message',
         'cancel_request',
         'send_request',
+        'block_user',
+        'unblock_user',
     ],
     student: [
         'view_clrs',
@@ -56,5 +60,7 @@ export const roles = {
         'delete_message',
         'cancel_connection',
         'accept_request',
+        'block_user',
+        'unblock_user',
     ],
 };

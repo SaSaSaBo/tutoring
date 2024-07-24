@@ -33,6 +33,8 @@ import { MessageService } from './modules/messages/messages.service';
 import { ConnectionService } from './modules/connection/connection.service';
 import { RequestModule } from './modules/request/request.module';
 import { RequestEntity } from './modules/request/request.entity';
+import { BlockModule } from './modules/block/block.module';
+import { BlockEntity } from './modules/block/block.entity';
 
 @Module({
   imports: [
@@ -51,6 +53,7 @@ import { RequestEntity } from './modules/request/request.entity';
       MessageEntity,
       ConnectionEntity,
       RequestEntity,
+      BlockEntity,
     ]),
     CategoryModule, 
     TransactionModule, 
@@ -62,6 +65,7 @@ import { RequestEntity } from './modules/request/request.entity';
     ConnectionModule,
     MessagesModule,
     RequestModule,
+    BlockModule,
   ],
   controllers: [AppController],
   providers: [

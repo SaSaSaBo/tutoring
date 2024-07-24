@@ -21,6 +21,7 @@ import { MessageEntity } from '../messages/messages.entity';
 import { MessageService } from '../messages/messages.service';
 import { ConnectionService } from '../connection/connection.service';
 import { RequestEntity } from '../request/request.entity';
+import { BlockEntity } from '../block/block.entity';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { RequestEntity } from '../request/request.entity';
       ConnectionEntity,
       MessageEntity,
       RequestEntity,
+      BlockEntity,
     ])
   ],
   providers: [

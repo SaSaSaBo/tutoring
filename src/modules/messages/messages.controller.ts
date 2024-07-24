@@ -8,12 +8,15 @@ import { Role } from '../enum/role.enum';
 import { PermissionGuard } from '../guards/permission.guard';
 import { RoleGuard } from '../guards/role.guard';
 import { DeleteMessageDto } from '../dto/message/delete.dto';
+import { BlockDto } from '../dto/block/block.dto';
+import { BlockService } from '../block/block.service';
 
 @Controller('messages')
 export class MessageController {
   constructor(
     private messageService: MessageService,
     private usersService: UserService,
+    private blockService: BlockService
   ) {}
 
   @UseGuards(AuthGuard, PermissionGuard, RoleGuard)
@@ -45,6 +48,31 @@ export class MessageController {
   ) {
     const user = await this.usersService.findOne(req.user.username);
     await this.messageService.deleteMessagesBetweenUsers(user.id, targetUserId, deleteData);
+  }
+
+
+  @UseGuards(AuthGuard)
+  @Permissions('block_user')
+  @Roles(Role.Teacher, Role.SubTeacher, Role.Student)
+  @Post('block')
+  async blockUser(
+    @Req() req,
+    @Body() blockData: BlockDto
+  ) {
+    const user = await this.usersService.findOne(req.user.username);
+    await this.blockService.blockUser(user, blockData);
+  }
+
+  @UseGuards(AuthGuard, PermissionGuard, RoleGuard)
+  @Permissions('unblock_user')
+  @Roles(Role.Teacher, Role.SubTeacher, Role.Student)
+  @Post('unblock')
+  async unblockUser(
+    @Req() req,
+    @Body() blockData: BlockDto
+  ) {
+    const user = await this.usersService.findOne(req.user.username);
+    await this.blockService.unblockUser(user, blockData);
   }
 
 }

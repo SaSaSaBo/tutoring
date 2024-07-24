@@ -20,6 +20,8 @@ import { InOutService } from '../in-out/in-out.service';
 import { ConnectionEntity } from '../connection/connection.entity';
 import { ConnectionService } from '../connection/connection.service';
 import { RequestEntity } from '../request/request.entity';
+import { BlockService } from '../block/block.service';
+import { BlockEntity } from '../block/block.entity';
 
 @Module({
   imports: [
@@ -34,6 +36,7 @@ import { RequestEntity } from '../request/request.entity';
       TransactionEntity,
       ConnectionEntity,
       RequestEntity,
+      BlockEntity,
     ])
   ],
   controllers: [MessageController],
@@ -47,6 +50,7 @@ import { RequestEntity } from '../request/request.entity';
     AuthService,
     InOutService,
     ConnectionService,
+    BlockService,
   ]
 })
 export class MessagesModule {}
