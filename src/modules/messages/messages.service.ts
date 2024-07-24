@@ -21,50 +21,50 @@ export class MessageService {
     private blockRepository: Repository<BlockEntity>,
     
   ) {}
-
   async sendMessage(sender: UsersEntity, receiver: UsersEntity, content: string): Promise<MessageEntity> {
-    // Bloklama kontrolü
-    const block = await this.blockRepository.findOne({
-      where: [
-        { blocker: { id: sender.id }, blocked: { id: receiver.id }, unblockedDate: null },
-        { blocker: { id: receiver.id }, blocked: { id: sender.id }, unblockedDate: null },
-      ],
+    // Aktif blok kayıtlarını kontrol et
+    const activeBlocks = await this.blockRepository.find({
+        where: [
+            { blocker: { id: sender.id }, blocked: { id: receiver.id }, unblockedDate: null },
+            { blocker: { id: receiver.id }, blocked: { id: sender.id }, unblockedDate: null }
+        ],
     });
 
-    console.log('block:', block); // Debug: Bloklama verilerini kontrol et
-
-    // Eğer bloklama varsa ve unblockedDate null ise hata fırlat
-    if (!block) {
-      throw new ForbiddenException('Your not able to send message. One of the users is blocked.');
+    console.log('activeBlocks: ', activeBlocks);
+    
+    if (!activeBlocks) {
+        throw new ForbiddenException('You cannot send a message because one of the users is blocked.');
     }
 
-    // Bağlantı kontrolü
+    if(activeBlocks.length != null){
+      throw new ForbiddenException('You cannot send a message because one of the users is blocked.');
+    }
+
     const connection = await this.connectionRepository.findOne({
-      where: [
-        { requester: sender, requestee: receiver },
-        { requester: receiver, requestee: sender },
-      ],
+        where: [
+            { requester: sender, requestee: receiver },
+            { requester: receiver, requestee: sender },
+        ],
     });
 
-    // Mesaj atan kişinin rolü 'teacher' veya 'sub_teacher' ise ve ilk mesaj atma girişimindeyse
     if ((sender.roles === Role.Teacher || sender.roles === Role.SubTeacher) && !connection) {
-      throw new ForbiddenException('Teacher or Sub-Teacher cannot initiate the first message.');
+        throw new ForbiddenException('Teacher or Sub-Teacher cannot initiate the first message.');
     }
 
-    // Mesaj atan kişinin rolü 'student' ise ve bağlantı kabul edilmemişse
     if (sender.roles === Role.Student && connection && !connection.accepted) {
-      throw new BadRequestException('Connection not accepted.');
+        throw new BadRequestException('Connection not accepted.');
     }
 
-    // Mesaj atan kişi rolü 'student' ise ve bağlantı yoksa
     if (sender.roles === Role.Student && !connection) {
-      throw new NotFoundException('Connection not found.');
+        throw new NotFoundException('Connection not found.');
     }
 
-    // Mesaj oluştur ve kaydet
     const message = this.messageRepository.create({ sender, receiver, content });
     return this.messageRepository.save(message);
-  }
+}
+
+
+
 
   async findMessages(userId: number): Promise<MessageEntity[]> {
     return this.messageRepository.find({

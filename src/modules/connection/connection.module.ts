@@ -18,6 +18,7 @@ import { CategoryService } from '../category/category.service';
 import { TransactionService } from '../transaction/transaction.service';
 import { TransactionEntity } from '../transaction/transaction.entity';
 import { RequestEntity } from '../request/request.entity';
+import { BlockEntity } from '../block/block.entity';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { RequestEntity } from '../request/request.entity';
       InfoEntity,
       TransactionEntity,
       RequestEntity,
+      BlockEntity,
     ])
   ],
   controllers: [ConnectionController],
