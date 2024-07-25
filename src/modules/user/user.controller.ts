@@ -10,6 +10,7 @@ import { AddUsersToCatsDto } from '../dto/user/add.user.to.cat.dto';
 import { Permissions } from '../decorator/permission.decorator';
 import { Roles } from '../decorator/role.decorator';
 import { AddStudentToClrDto } from '../dto/user/add.student.to.clr.dto';
+import { ProfileService } from '../profile/profile.service';
 
 
 @Controller('user')
@@ -17,6 +18,7 @@ export class UserController {
 
     constructor(
         private userService: UserService,
+        private profileService: ProfileService,
       ) {}
 
       @Get('all')
@@ -24,23 +26,27 @@ export class UserController {
       @Permissions('view_users')
       @Roles(Role.Manager)
       async findAll () {
-        return this.userService.findAll();
+        return this.profileService.findAll();
       }
 
-      @Get('sub-teachers')
+      @Get('teachers')
       @UseGuards(AuthGuard, RoleGuard, PermissionGuard)
       @Permissions('view_students')
       @Roles(Role.Teacher)
-      async findAllStudents () {
-        return this.userService.findAllStudents();
+      async findAllStudents (
+        @Req() req: Request
+      ) {
+        const authHeader = req.headers['authorization'];
+        const accessToken = authHeader?.replace('Bearer ', '');
+        return this.profileService.findAllStudents(accessToken);
       }
 
       @Get('students')
       @UseGuards(AuthGuard, RoleGuard, PermissionGuard)
-      @Permissions('view_sub__teachers')
+      @Permissions('view_teachs')
       @Roles(Role.Student)
       async findAllSubTeachers () {
-        return this.userService.findAllSubTeachers();
+        return this.profileService.findAllTeachers();
       }
 
       @Post('join')

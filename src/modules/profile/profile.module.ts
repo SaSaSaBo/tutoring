@@ -5,6 +5,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersEntity } from '../user/user.entity';
 import { InOutEntity } from '../in-out/in-out.entity';
 import { ProfileEntity } from './profile.entity';
+import { ClassroomEntity } from '../classroom/classroom.entity';
+import { UserCrEntity } from '../entity/user.cr.entity';
 
 @Module({
   imports: [
@@ -12,6 +14,8 @@ import { ProfileEntity } from './profile.entity';
       ProfileEntity,
       UsersEntity,
       InOutEntity,
+      ClassroomEntity,
+      UserCrEntity,
     ])
   ],
   controllers: [ProfileController],

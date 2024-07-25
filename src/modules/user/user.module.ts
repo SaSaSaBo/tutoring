@@ -24,6 +24,7 @@ import { ConnectionService } from '../connection/connection.service';
 import { RequestEntity } from '../request/request.entity';
 import { BlockEntity } from '../block/block.entity';
 import { ProfileEntity } from '../profile/profile.entity';
+import { ProfileService } from '../profile/profile.service';
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { ProfileEntity } from '../profile/profile.entity';
     AuthService,
     MessageService,
     ConnectionService,
+    ProfileService,
   ],
 })
 export class UserModule {}
