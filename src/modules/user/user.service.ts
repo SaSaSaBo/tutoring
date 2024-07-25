@@ -199,7 +199,7 @@ export class UserService {
     const classrooms = await this.classroomRepository
       .createQueryBuilder('classroom')
       .leftJoinAndSelect('classroom.creator', 'creator')
-      .where('creator.roles IN (:...roles)', { roles: [Role.Teacher, Role.SubTeacher] })
+      .where('creator.roles IN (:...roles)', { roles: [Role.Teacher] })
       .getMany();
 
     // Sınıflarda kayıtlı olan 'student' rolüne sahip kullanıcıları bul
@@ -224,7 +224,7 @@ export class UserService {
   async findAllSubTeachers(): Promise<UsersEntity[]> {
     return this.usersRepository.find({
       where: {
-        roles: In([Role.Teacher, Role.SubTeacher]),
+        roles: In([Role.Teacher]),
       },
     });
   }
@@ -263,19 +263,16 @@ export class UserService {
     return await bcrypt.hash(password, saltRounds);
   }
 
-  async addUserToCat(dto: AddUsersToCatsDto): Promise<void> {
-    const user = await this.usersRepository.findOne({
-      where: { id: dto.userId },
-      relations: ['categories'],
-    });
-  
+  async joinCat(dto: AddUsersToCatsDto, userId: number): Promise<void> {
+    const user = await this.usersRepository.findOneBy({ id: userId });
+    
     if (!user) {
-      throw new BadRequestException(`User with id '${dto.userId}' not found.`);
+      throw new BadRequestException(`User with id '${userId}' not found.`);
     }
   
     // Check if user has 'teacher' or 'sub_teacher' role
-    if (!this.hasTeacherOrSubTeacherRole([user.roles])) {
-      throw new BadRequestException(`User with id '${dto.userId}' does not have permission to be added to categories.`);
+    if (!this.hasTeacherRole([user.roles])) {
+      throw new BadRequestException(`User with id '${userId}' does not have permission to be added to categories.`);
     }
   
     for (const categoryId of dto.categoryIds) {
@@ -303,6 +300,7 @@ export class UserService {
           .add(category);
       }
     }
+
   }
   
   async addStdntToClr(addStudentToClrDto: AddStudentToClrDto, accessToken: string): Promise<void> {
@@ -377,8 +375,8 @@ export class UserService {
     }
   }  
 
-  private hasTeacherOrSubTeacherRole(roles: Role[]): boolean {
-    return roles.some(role => [Role.Teacher, Role.SubTeacher].includes(role));
+  private hasTeacherRole(roles: Role[]): boolean {
+    return roles.some(role => [Role.Teacher].includes(role));
   }
   
   async update(id: number, data: UserUpdateDto) {

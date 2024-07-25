@@ -19,7 +19,7 @@ export class RequestController {
 
   @UseGuards(AuthGuard, RoleGuard, PermissionGuard)
   @Permissions('send_request')
-  @Roles(Role.Teacher, Role.SubTeacher)
+  @Roles(Role.Teacher)
   @Post('request/:id')
   async sendRequest(
     @Req() req, 
@@ -55,7 +55,7 @@ export class RequestController {
 
   @UseGuards(AuthGuard, RoleGuard, PermissionGuard)
   @Permissions('cancel_request')
-  @Roles(Role.Teacher, Role.SubTeacher)
+  @Roles(Role.Teacher)
   @Delete('delete/:id') 
   async deleteRequest(
     @Req() req,

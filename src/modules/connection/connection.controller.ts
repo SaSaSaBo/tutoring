@@ -34,7 +34,7 @@ export class ConnectionController {
 
   @UseGuards(AuthGuard, RoleGuard, PermissionGuard)
   @Permissions('accept_connection_request')
-  @Roles(Role.Teacher, Role.SubTeacher)
+  @Roles(Role.Teacher)
   @Post('accept/:id')
   async acceptConnection(
     @Req() req,

@@ -21,7 +21,7 @@ export class MessageController {
 
   @UseGuards(AuthGuard, PermissionGuard, RoleGuard)
   @Permissions('send_message')
-  @Roles(Role.Teacher, Role.SubTeacher, Role.Student)
+  @Roles(Role.Teacher, Role.Student)
   @Post('send/:id')
   async sendMessage(
     @Req() req, 
@@ -39,7 +39,7 @@ export class MessageController {
 
   @UseGuards(AuthGuard, PermissionGuard, RoleGuard)
   @Permissions('delete_message')
-  @Roles(Role.Teacher, Role.SubTeacher, Role.Student)
+  @Roles(Role.Teacher, Role.Student)
   @Delete('delete/:targetUserId')
   async deleteMessages(
     @Req() req,
@@ -53,7 +53,7 @@ export class MessageController {
 
   @UseGuards(AuthGuard)
   @Permissions('block_user')
-  @Roles(Role.Teacher, Role.SubTeacher, Role.Student)
+  @Roles(Role.Teacher, Role.Student)
   @Post('block')
   async blockUser(
     @Req() req,
@@ -65,7 +65,7 @@ export class MessageController {
 
   @UseGuards(AuthGuard, PermissionGuard, RoleGuard)
   @Permissions('unblock_user')
-  @Roles(Role.Teacher, Role.SubTeacher, Role.Student)
+  @Roles(Role.Teacher, Role.Student)
   @Post('unblock')
   async unblockUser(
     @Req() req,

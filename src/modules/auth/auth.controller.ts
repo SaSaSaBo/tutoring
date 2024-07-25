@@ -19,7 +19,7 @@ export class AuthController {
     @Get()
     @UseGuards(AuthGuard, RoleGuard, PermissionGuard)
     @Permissions('view_users', 'view_user')
-    @Roles(Role.Manager, Role.Teacher, Role.SubTeacher, Role.Student) 
+    @Roles(Role.Manager, Role.Teacher, Role.Student) 
     async findAll() {
       return this.authService.findAll();
     }

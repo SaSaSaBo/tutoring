@@ -47,7 +47,7 @@ export class MessageService {
         ],
     });
 
-    if ((sender.roles === Role.Teacher || sender.roles === Role.SubTeacher) && !connection) {
+    if ((sender.roles === Role.Teacher) && !connection) {
         throw new ForbiddenException('Teacher or Sub-Teacher cannot initiate the first message.');
     }
 

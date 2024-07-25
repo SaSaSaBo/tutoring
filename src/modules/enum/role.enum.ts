@@ -1,7 +1,7 @@
 export enum Role {
     Manager = 'manager',
     Teacher = 'teacher',
-    SubTeacher = 'sub_teacher',
+
     Student = 'student',
 }
 
@@ -10,12 +10,11 @@ export const roles = {
             'view_users', 
             'view_cats',
             'view_crs', 
-            'add_users_to_cat',
-            'add_cat',
             'delete_users',         
             'delete_cat', 
             'update_users',
-            'update_cat'
+            'update_cat',
+            'add_cat'
     ],
     teacher: [
         'view_students', 
@@ -30,28 +29,13 @@ export const roles = {
         'delete_message',
         'cancel_request',
         'send_request',
-        'block_user',
-        'unblock_user',
-    ],
-    sub_teacher: [
-        'view_students', 
-        'view_crs',
-        'add_student',
-        'create_class',
-        'update_class',
-        'delete_class',
-        'accept_connection_request',
-        'send_message',
-        'send_invite_request',
-        'delete_message',
-        'cancel_request',
-        'send_request',
+        'join_cat',
         'block_user',
         'unblock_user',
     ],
     student: [
         'view_clrs',
-        'view_sub__teachers',
+        'view_teachs',
         'update_own_profile',
         'send_connection_request',
         'accept_connection_request',

@@ -2,9 +2,6 @@ import { ArrayMinSize, ArrayNotEmpty, IsArray, IsInt } from "class-validator";
 
 export class AddUsersToCatsDto {
 
-    @IsInt()
-    userId: number;
-
     @IsArray()
     @ArrayNotEmpty()
     @ArrayMinSize(1)

@@ -19,7 +19,7 @@ export class ClassroomController {
 
     @UseGuards(AuthGuard, RoleGuard, PermissionGuard)
     @Permissions('view_crs')
-    @Roles(Role.Teacher, Role.SubTeacher)
+    @Roles(Role.Teacher)
     @Get('asTeachs')
     async getClassroomsForTeachs(@Req() req:any) {  
         return this.crService.getClassroomsForTeachs(req.user.sub);
@@ -36,7 +36,7 @@ export class ClassroomController {
 
     @UseGuards(AuthGuard, RoleGuard, PermissionGuard)
     @Permissions('create_class')
-    @Roles(Role.Teacher, Role.SubTeacher)
+    @Roles(Role.Teacher)
     @Post('create')
     async createClassroom(
         @Body() createData: CreateCRDto,
@@ -48,7 +48,7 @@ export class ClassroomController {
 
     @UseGuards(AuthGuard, RoleGuard, PermissionGuard)
     @Permissions('update_class')
-    @Roles(Role.Teacher, Role.SubTeacher)
+    @Roles(Role.Teacher)
     @Put('update/:id')
     async updateClassroom(
       @Param('id', ParseIntPipe) id: number,
@@ -60,7 +60,7 @@ export class ClassroomController {
     }
     @UseGuards(AuthGuard, RoleGuard, PermissionGuard)
     @Permissions('delete_class')
-    @Roles(Role.Teacher, Role.SubTeacher)
+    @Roles(Role.Teacher)
     @Delete('delete')
     async deleteClassroom(
         @Body() deleteData: DeleteCRDto,

@@ -30,7 +30,7 @@ export class UserController {
       @Get('sub-teachers')
       @UseGuards(AuthGuard, RoleGuard, PermissionGuard)
       @Permissions('view_students')
-      @Roles(Role.Teacher, Role.SubTeacher)
+      @Roles(Role.Teacher)
       async findAllStudents () {
         return this.userService.findAllStudents();
       }
@@ -43,19 +43,21 @@ export class UserController {
         return this.userService.findAllSubTeachers();
       }
 
-      @Post('add')
+      @Post('join')
       @UseGuards(AuthGuard, RoleGuard, PermissionGuard)
-      @Permissions('add_users_to_cat')
-      @Roles(Role.Manager)
-      async addUserToCat(
+      @Permissions('join_cat')
+      @Roles(Role.Teacher)
+      async joinCat(
+        @Req() req,
         @Body() addUserToCatDto: AddUsersToCatsDto ) {
-        return this.userService.addUserToCat(addUserToCatDto);
+          const userId = req.user.sub;
+        return this.userService.joinCat(addUserToCatDto, userId);
       }
 
       @Post('add/stdnt')
       @UseGuards(AuthGuard, RoleGuard, PermissionGuard)
       @Permissions('add_student')
-      @Roles(Role.Teacher, Role.SubTeacher)
+      @Roles(Role.Teacher)
       async addStdntToClr(
         @Body() addData: AddStudentToClrDto, // DTO'yu burada alıyoruz
         @Req() req: Request // Request nesnesini alıyoruz
