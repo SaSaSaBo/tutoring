@@ -34,7 +34,6 @@ export class ProfileService {
         private jwtService: JwtService,
     ) {}
 
-    
   async findAll(): Promise<UsersEntity[]> {
     return this.userRepository.find();
   }
