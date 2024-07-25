@@ -59,11 +59,7 @@ export class ConnectionService {
     }
 
     return this.connectionRepository.save(connection);
-}
-
-
-
-  
+}  
 
   async acceptConnection(requesteeId: UsersEntity, requesterId: UsersEntity, acceptData: AcceptConnectionDto): Promise<ConnectionEntity> {        
     const connection = await this.connectionRepository.findOne({
@@ -109,6 +105,5 @@ export class ConnectionService {
   
     return connection;
   }
-  
   
 }

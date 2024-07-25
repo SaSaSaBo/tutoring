@@ -98,6 +98,7 @@ export class BlockService {
           throw new ForbiddenException('You cannot unblock this user again.');
         }
 
+        
     // En son blok kaydını bul
     const block = await this.blockRepository.findOne({
       where: {

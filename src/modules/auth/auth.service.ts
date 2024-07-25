@@ -11,6 +11,7 @@ import { ResponseRegister } from "./interface/response.register";
 import { UserLoginDto } from "../dto/user/login.dto";
 import * as config from 'config';
 import { Role, roles } from "../enum/role.enum";
+import { Roles } from "../decorator/role.decorator";
 
 @Injectable()
 export class AuthService {
@@ -35,6 +36,10 @@ export class AuthService {
 
   async register(data: UserRegisterDto): Promise<ResponseRegister> {
       const { password, password_confirm } = data;
+
+      if(data.roles == 'manager'){
+        throw new InternalServerErrorException("Bu rol ile kayıt devre dışı.");
+      }
 
       if (password !== password_confirm) {
         throw new InternalServerErrorException("Passwords don't match!");
