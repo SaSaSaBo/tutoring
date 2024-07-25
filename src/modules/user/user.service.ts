@@ -264,8 +264,11 @@ export class UserService {
   }
 
   async joinCat(dto: AddUsersToCatsDto, userId: number): Promise<void> {
-    const user = await this.usersRepository.findOneBy({ id: userId });
-    
+    const user = await this.usersRepository.findOne({
+      where: { id: userId },
+      relations: ['categories'], // Kategorileri ilişkilendirin
+    });
+  
     if (!user) {
       throw new BadRequestException(`User with id '${userId}' not found.`);
     }
@@ -300,8 +303,8 @@ export class UserService {
           .add(category);
       }
     }
-
   }
+  
   
   async addStdntToClr(addStudentToClrDto: AddStudentToClrDto, accessToken: string): Promise<void> {
     // JWT'den kullanıcı kimliğini al
