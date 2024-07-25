@@ -392,12 +392,107 @@ async findAllStudents(accessToken: string): Promise<UsersEntity[]> {
 */
 
 
+
+// async findAllStudents(accessToken: string): Promise<any> {
+//   const decodedToken: any = this.jwtService.decode(accessToken);
+//   const userId = decodedToken.sub;
+
+//   if (!userId || isNaN(Number(userId))) {
+//     throw new InternalServerErrorException('Invalid token or user ID not found.');
+//   }
+
+//   try {
+//     // Find classrooms created by the user
+//     const classrooms = await this.classroomRepository
+//       .createQueryBuilder('classroom')
+//       .where('classroom.creatorId = :userId', { userId: Number(userId) })
+//       .getMany();
+
+//     if (classrooms.length === 0) {
+//       throw new InternalServerErrorException('No classrooms found for this user.');
+//     }
+
+//     console.log('classrooms:', classrooms); // ok
+
+//     // Find users with 'student' role in these classrooms
+//     const studentClassRelations = await this.userCrRepository
+//       .createQueryBuilder('user_cr')
+//       .leftJoinAndSelect('user_cr.user', 'user')
+//       .where('user_cr.classroomId IN (:...classroomIds)', { classroomIds: classrooms.map(c => c.id) })
+//       .andWhere('user.roles = :role', { role: Role.Student })
+//       .getMany();
+
+//     console.log('studentClassRelations:', studentClassRelations); // ok
+
+//     // Get users with 'student' role
+//     const users = await this.userRepository.find({
+//       where: { roles: Role.Student },
+//     });
+
+//     console.log('Users:', users); // ok
+
+//     // Extract IDs of students
+//     const studentIds = users.map(user => user.id);
+
+//     // Get profiles based on user IDs
+//     const profiles = await this.profileRepository.find({
+//       where: { username: In(studentIds) } // Ensure `usernameId` is correct
+//     });
+
+//     // Create an array for incomplete profiles
+//     const incompleteProfiles: ProfileEntity[] = [];
+
+//     // Identify incomplete profiles
+//     users.forEach(user => {
+//       const profile = profiles.find(profile => profile.username.username === user.username);
+
+//       if (!profile || !profile.name || !profile.surname || !profile.dateOfBirth || !profile.gender) {
+//         incompleteProfiles.push({
+//           id: profile?.id ?? null,
+//           name: profile?.name ?? '',
+//           surname: profile?.surname ?? '',
+//           dateOfBirth: profile?.dateOfBirth ?? new Date(), // Default date
+//           gender: profile?.gender ?? '',
+//           username: user, // Directly use the user object
+//           residence: profile?.residence ?? '', // Default values
+//           phone: profile?.phone ?? '',
+//           email: profile?.email ?? '',
+//           roles: profile?.roles ?? ''
+//         } as ProfileEntity); // Cast to ProfileEntity
+//       }
+//     });
+
+//     // Create completed profiles
+//     const completedProfiles = profiles.filter(profile =>
+//       profile.name && profile.surname && profile.dateOfBirth && profile.gender
+//     );
+
+//     console.log('Completed Profiles:', completedProfiles); // Debug log
+//     console.log('Incomplete Profiles:', incompleteProfiles); // Debug log
+
+//     // Return results
+//     return {
+//       completedProfiles,
+//       incompleteProfiles,
+//       message: incompleteProfiles.length > 0 
+//         ? 'There are students with incomplete profiles.'
+//         : 'All student profiles are complete.' 
+//     };
+//   } catch (error) {
+//     console.error('Error occurred:', error);
+//     throw new InternalServerErrorException('Failed to find students');
+//   }
+// }
+
+
+
+
 /*
 async findAllStudents(accessToken: string): Promise<any> {
   const decodedToken: any = this.jwtService.decode(accessToken);
   const userId = decodedToken.sub;
 
-  if (!userId || isNaN(Number(userId))) {
+  if (!userId) {
     throw new InternalServerErrorException('Invalid token or user ID not found.');
   }
 
@@ -424,6 +519,9 @@ async findAllStudents(accessToken: string): Promise<any> {
 
     console.log('studentClassRelations:', studentClassRelations);
 
+    // Extract user IDs from studentClassRelations
+    const studentClassUser = studentClassRelations.map(relation => relation.user.username);
+
     // Get users with 'student' role
     const users = await this.userRepository.find({
       where: { roles: Role.Student },
@@ -436,29 +534,36 @@ async findAllStudents(accessToken: string): Promise<any> {
 
     // Get profiles based on user IDs
     const profiles = await this.profileRepository.find({
-      where: { username: In(studentIds) } // Ensure `usernameId` is correct
+      where: { username: In(studentIds) } // Adjusted to use userId if it exists
     });
+
+  console.log('profiles:', profiles);
+
 
     // Create an array for incomplete profiles
     const incompleteProfiles: ProfileEntity[] = [];
 
+    // Create a map of profiles for quick access
+    const profilesMap = new Map<number, ProfileEntity>();
+    profiles.forEach(profile => profilesMap.set(profile.username.id, profile));
+
     // Identify incomplete profiles
     users.forEach(user => {
-      const profile = profiles.find(profile => profile.username.username === user.username);
+      const profile = profilesMap.get(user.id);
 
       if (!profile || !profile.name || !profile.surname || !profile.dateOfBirth || !profile.gender) {
         incompleteProfiles.push({
-          id: profile?.id ?? null,
-          name: profile?.name ?? '',
-          surname: profile?.surname ?? '',
-          dateOfBirth: profile?.dateOfBirth ?? new Date(), // Default date
-          gender: profile?.gender ?? '',
-          username: user, // Directly use the user object
-          residence: profile?.residence ?? '', // Default values
-          phone: profile?.phone ?? '',
-          email: profile?.email ?? '',
-          roles: profile?.roles ?? ''
-        } as ProfileEntity); // Cast to ProfileEntity
+        id: profile?.id ?? null,
+        name: profile?.name ?? '',
+        surname: profile?.surname ?? '',
+        dateOfBirth: profile?.dateOfBirth,//? new Date(profile.dateOfBirth) : new Date(), // Varsayılan tarih
+        gender: profile?.gender ?? '',
+        username: user, // Kullanıcı nesnesini doğrudan kullanın
+        residence: profile?.residence ?? '', // Eksik olan diğer özellikler
+        phone: profile?.phone ?? '', // Varsayılan değerler ekleyin
+        email: profile?.email ?? '',
+        roles: profile?.roles ?? ''
+      } as ProfileEntity); // ProfileEntity türüne dönüştür
       }
     });
 
@@ -467,12 +572,17 @@ async findAllStudents(accessToken: string): Promise<any> {
       profile.name && profile.surname && profile.dateOfBirth && profile.gender
     );
 
-    console.log('Completed Profiles:', completedProfiles); // Debug log
-    console.log('Incomplete Profiles:', incompleteProfiles); // Debug log
+    // Filter out profiles not in studentClassUserIds
+    const completedProfilesFiltered = completedProfiles.filter(profile =>
+      studentClassUser.includes(profile.username.username)
+    );
+
+    console.log('Completed Profiles:', completedProfilesFiltered);
+    console.log('Incomplete Profiles:', incompleteProfiles);
 
     // Return results
     return {
-      completedProfiles,
+      completedProfiles: completedProfilesFiltered,
       incompleteProfiles,
       message: incompleteProfiles.length > 0 
         ? 'There are students with incomplete profiles.'
@@ -483,30 +593,12 @@ async findAllStudents(accessToken: string): Promise<any> {
     throw new InternalServerErrorException('Failed to find students');
   }
 }
-son uğraştığım
 */
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- async findAllStudents(accessToken: string): Promise<{ completedProfiles: ProfileEntity[], incompleteProfiles: ProfileEntity[], message: string }> {
-  // Token'ı çözümleyerek kullanıcı ID'sini alın
+async findAllStudents(accessToken: string) {
   const decodedToken: any = this.jwtService.decode(accessToken);
   const userId = decodedToken.sub;
 
@@ -526,7 +618,27 @@ son uğraştığım
 
   console.log('Classrooms:', classrooms);
 
-  // Sınıflarda olan öğrencilerin profillerini getirin
+  // Get student-class relations
+  const studentClassRelations = await this.userCrRepository
+    .createQueryBuilder('user_cr')
+    .leftJoinAndSelect('user_cr.user', 'user')
+    .where('user_cr.classroomId IN (:...classroomIds)', { classroomIds: classrooms.map(c => c.id) })
+    .andWhere('user.roles = :role', { role: Role.Student })
+    .getMany();
+
+  console.log('studentClassRelations:', studentClassRelations);
+
+  // Extract student IDs from studentClassRelations
+  const studentUsernames: string[] = studentClassRelations.map(relation => {
+    // Eğer relation.user.username bir UsersEntity ise, ona erişim sağlayalım
+    if (relation.user.username && typeof relation.user.username === 'object') {
+      return relation.user.username || ''; // UsersEntity içindeki username alanına erişim
+    }
+    return ''; // Eğer kullanıcı yoksa boş döndür
+  }).filter(username => username !== '');
+
+  console.log('studentUsernames:', studentUsernames);
+  
   const profiles = await this.profileRepository
     .createQueryBuilder('profile')
     .leftJoinAndSelect('profile.username', 'user') // İlişki adı doğru olduğundan emin olun
@@ -536,52 +648,118 @@ son uğraştığım
 
   console.log('All Profiles That Are Students:', profiles);
 
-  // Kullanıcıları öğrenci rollerine göre al
-  const users = await this.userRepository.find({
-    where: { roles: Role.Student },
-  });
-  console.log('Users:', users);
-
-  // Eksik profiller için bir dizi oluştur
-  const incompleteProfiles: ProfileEntity[] = [];
-
-  // Kullanıcılar arasında eksik profilleri belirle
-  users.forEach(user => {
-    const profile = profiles.find(profile => profile.username.username === user.username);
-
-    if (!profile || !profile.name || !profile.surname || !profile.dateOfBirth || !profile.gender) {
-      incompleteProfiles.push({
-        id: profile?.id ?? null,
-        name: profile?.name ?? '',
-        surname: profile?.surname ?? '',
-        dateOfBirth: profile?.dateOfBirth,//? new Date(profile.dateOfBirth) : new Date(), // Varsayılan tarih
-        gender: profile?.gender ?? '',
-        username: user, // Kullanıcı nesnesini doğrudan kullanın
-        residence: profile?.residence ?? '', // Eksik olan diğer özellikler
-        phone: profile?.phone ?? '', // Varsayılan değerler ekleyin
-        email: profile?.email ?? '',
-        roles: profile?.roles ?? ''
-      } as ProfileEntity); // ProfileEntity türüne dönüştür
-    }
-  });
-
-  // Tamamlanmış profilleri oluştur
-  const completedProfiles = profiles.filter(profile =>
+    const completedProfiles = profiles.filter(profile =>
     profile.name && profile.surname && profile.dateOfBirth && profile.gender
   );
 
   console.log('Completed Profiles:', completedProfiles); // Debug log
-  console.log('Incomplete Profiles:', incompleteProfiles); // Debug log
 
-  // Sonuçları döndür
+  const incompletedProfiles = studentClassRelations.filter(relation => {
+    const username = relation.user.username; // Username direkt burada string olsa bu şekilde kullanacağız
+    return username && !profiles.some(profile => profile.username.username === username);
+  });
+
+
+// Sonuçları konsola yazdır
+console.log('incompletedProfiles:', incompletedProfiles);
+
   return {
     completedProfiles,
-    incompleteProfiles,
-    message: incompleteProfiles.length > 0 
+    incompletedProfiles,
+    message: incompletedProfiles.length > 0 
       ? 'There are students with incomplete profiles.'
       : 'All student profiles are complete.' 
   };
 }
+
+
+
+
+
+
+
+
+
+
+
+
+//  async findAllStudents(accessToken: string): Promise<{ completedProfiles: ProfileEntity[], incompleteProfiles: ProfileEntity[], message: string }> {
+//   // Token'ı çözümleyerek kullanıcı ID'sini alın
+//   const decodedToken: any = this.jwtService.decode(accessToken);
+//   const userId = decodedToken.sub;
+
+//   if (!userId) {
+//     throw new InternalServerErrorException('Invalid token or user ID not found.');
+//   }
+
+//   // Kullanıcının oluşturduğu sınıfları bulun
+//   const classrooms = await this.classroomRepository
+//     .createQueryBuilder('classroom')
+//     .where('classroom.creatorId = :userId', { userId })
+//     .getMany();
+
+//   if (classrooms.length === 0) {
+//     throw new InternalServerErrorException('No classrooms found for this user.');
+//   }
+
+//   console.log('Classrooms:', classrooms);
+
+//   // Sınıflarda olan öğrencilerin profillerini getirin
+//   const profiles = await this.profileRepository
+//     .createQueryBuilder('profile')
+//     .leftJoinAndSelect('profile.username', 'user') // İlişki adı doğru olduğundan emin olun
+//     .where('user.roles = :role', { role: Role.Student })
+//     .select(['profile.id', 'profile.name', 'profile.surname', 'profile.dateOfBirth', 'profile.gender', 'user.username'])
+//     .getMany();
+
+//   console.log('All Profiles That Are Students:', profiles);
+
+//   // Kullanıcıları öğrenci rollerine göre al
+//   const users = await this.userRepository.find({
+//     where: { roles: Role.Student },
+//   });
+//   console.log('Users:', users);
+
+//   // Eksik profiller için bir dizi oluştur
+//   const incompleteProfiles: ProfileEntity[] = [];
+
+//   // Kullanıcılar arasında eksik profilleri belirle
+//   users.forEach(user => {
+//     const profile = profiles.find(profile => profile.username.username === user.username);
+
+//     if (!profile || !profile.name || !profile.surname || !profile.dateOfBirth || !profile.gender) {
+//       incompleteProfiles.push({
+//         id: profile?.id ?? null,
+//         name: profile?.name ?? '',
+//         surname: profile?.surname ?? '',
+//         dateOfBirth: profile?.dateOfBirth,//? new Date(profile.dateOfBirth) : new Date(), // Varsayılan tarih
+//         gender: profile?.gender ?? '',
+//         username: user, // Kullanıcı nesnesini doğrudan kullanın
+//         residence: profile?.residence ?? '', // Eksik olan diğer özellikler
+//         phone: profile?.phone ?? '', // Varsayılan değerler ekleyin
+//         email: profile?.email ?? '',
+//         roles: profile?.roles ?? ''
+//       } as ProfileEntity); // ProfileEntity türüne dönüştür
+//     }
+//   });
+
+//   // Tamamlanmış profilleri oluştur
+//   const completedProfiles = profiles.filter(profile =>
+//     profile.name && profile.surname && profile.dateOfBirth && profile.gender
+//   );
+
+//   console.log('Completed Profiles:', completedProfiles); // Debug log
+//   console.log('Incomplete Profiles:', incompleteProfiles); // Debug log
+
+//   // Sonuçları döndür
+//   return {
+//     completedProfiles,
+//     incompleteProfiles,
+//     message: incompleteProfiles.length > 0 
+//       ? 'There are students with incomplete profiles.'
+//       : 'All student profiles are complete.' 
+//   };
+// }
 
   async findAllTeachers(): Promise<{ completedProfiles: ProfileEntity[], incompleteProfiles: ProfileEntity[], message: string }> {
     // Tüm profilleri öğretmenlerle birlikte getir
