@@ -34,7 +34,11 @@ export class CategoryController {
         @Req() req
     ) {
         console.log('Request Body:', addData);
-        const userId = req.user.id;
+        
+        const userId = req.user.sub;
+
+        console.log('User ID:', userId);
+        
         const category = await this.categoryService.addCategories(addData, userId);
         return {
             success: true,
