@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpException, HttpStatus, Post, Req, UseGuards } from '@nestjs/common';
 import { RoleGuard } from '../guards/role.guard';
 import { PermissionGuard } from '../guards/permission.guard';
 import { Permissions } from '../decorator/permission.decorator';
@@ -8,12 +8,15 @@ import { UserRegisterDto } from '../dto/user/register.dto';
 import { UserLoginDto } from '../dto/user/login.dto';
 import { AuthService } from '../auth/auth.service';
 import { AuthGuard } from '../guards/auth.guard';
+import { CreateProfileDto } from '../dto/profile/create.dto';
+import { ProfileService } from '../profile/profile.service';
 
 @Controller('auth')
 export class AuthController {
 
     constructor(
         private authService: AuthService,
+        private profileService: ProfileService,
     ) {}
 
     @Get()
@@ -32,10 +35,27 @@ export class AuthController {
   
     @Post('login')
     async login(
-      @Body() data: UserLoginDto) {
+    @Body() data: UserLoginDto) {
         const user = await this.authService.login(data);
         return { success: true, message: 'User logged in successfully.', data: user };
+    }
+
+    @Post('profile')
+    async profile(
+      @Body() data: CreateProfileDto,
+      @Req() req: Request
+    ) {
+      const authHeader = req.headers['authorization'];
+      const accessToken = authHeader?.replace('Bearer ', '');
+
+      console.log('Controller: Access Token:', accessToken);
+        
+      if (!accessToken) {
+        throw new HttpException('Access token not provided', HttpStatus.UNAUTHORIZED);
       }
+      
+      return this.profileService.createProfile(data, accessToken);
+    }
     
     @Post('logout')
     async logout(

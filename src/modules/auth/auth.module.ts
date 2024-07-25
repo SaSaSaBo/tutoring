@@ -18,6 +18,8 @@ import { TransactionEntity } from '../transaction/transaction.entity';
 import { UserCrEntity } from '../entity/user.cr.entity';
 import { ClassroomEntity } from '../classroom/classroom.entity';
 import { RequestEntity } from '../request/request.entity';
+import { ProfileService } from '../profile/profile.service';
+import { ProfileEntity } from '../profile/profile.entity';
 
 @Module({
   imports: [
@@ -31,6 +33,7 @@ import { RequestEntity } from '../request/request.entity';
       UserCrEntity,
       ClassroomEntity,
       RequestEntity,
+      ProfileEntity,
     ]),
     JwtModule.register({
       global: true,
@@ -49,6 +52,7 @@ import { RequestEntity } from '../request/request.entity';
     InfoService,
     CategoryService,
     TransactionService,
+    ProfileService,
   ],
 })
 export class AuthModule {}

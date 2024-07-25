@@ -23,6 +23,7 @@ import { MessageService } from '../messages/messages.service';
 import { ConnectionService } from '../connection/connection.service';
 import { RequestEntity } from '../request/request.entity';
 import { BlockEntity } from '../block/block.entity';
+import { ProfileEntity } from '../profile/profile.entity';
 @Module({
   imports: [
     TypeOrmModule.forFeature([ 
@@ -37,6 +38,7 @@ import { BlockEntity } from '../block/block.entity';
       ConnectionEntity,
       RequestEntity,
       BlockEntity,
+      ProfileEntity,
     ]),
   ],
   controllers: [CategoryController],

@@ -8,7 +8,7 @@ import {
   } from '@nestjs/common';
 import { UsersEntity } from './user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Not, Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { CategoryEntity } from '../category/category.entity';
 import * as bcrypt from 'bcrypt';
 import { InfoService } from '../info/info.service';
@@ -304,7 +304,6 @@ export class UserService {
       }
     }
   }
-  
   
   async addStdntToClr(addStudentToClrDto: AddStudentToClrDto, accessToken: string): Promise<void> {
     // JWT'den kullanıcı kimliğini al

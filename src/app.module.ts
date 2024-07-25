@@ -35,6 +35,8 @@ import { RequestModule } from './modules/request/request.module';
 import { RequestEntity } from './modules/request/request.entity';
 import { BlockModule } from './modules/block/block.module';
 import { BlockEntity } from './modules/block/block.entity';
+import { ProfileModule } from './modules/profile/profile.module';
+import { ProfileEntity } from './modules/profile/profile.entity';
 
 @Module({
   imports: [
@@ -54,6 +56,7 @@ import { BlockEntity } from './modules/block/block.entity';
       ConnectionEntity,
       RequestEntity,
       BlockEntity,
+      ProfileEntity,
     ]),
     CategoryModule, 
     TransactionModule, 
@@ -66,6 +69,7 @@ import { BlockEntity } from './modules/block/block.entity';
     MessagesModule,
     RequestModule,
     BlockModule,
+    ProfileModule,
   ],
   controllers: [AppController],
   providers: [

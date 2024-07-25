@@ -11,13 +11,16 @@ import { ResponseRegister } from "./interface/response.register";
 import { UserLoginDto } from "../dto/user/login.dto";
 import * as config from 'config';
 import { Role, roles } from "../enum/role.enum";
-import { Roles } from "../decorator/role.decorator";
+import { ProfileEntity } from "../profile/profile.entity";
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(UsersEntity)
     private usersRepository: Repository<UsersEntity>,
+
+    @InjectRepository(ProfileEntity)
+    private profileRepository: Repository<ProfileEntity>,
 
     private jwtService: JwtService,
     private userService: UserService,

@@ -22,6 +22,7 @@ import { ConnectionService } from '../connection/connection.service';
 import { RequestEntity } from '../request/request.entity';
 import { BlockService } from '../block/block.service';
 import { BlockEntity } from '../block/block.entity';
+import { ProfileEntity } from '../profile/profile.entity';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { BlockEntity } from '../block/block.entity';
       ConnectionEntity,
       RequestEntity,
       BlockEntity,
+      ProfileEntity,
     ])
   ],
   controllers: [MessageController],

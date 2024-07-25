@@ -59,7 +59,7 @@ export class UsersEntity extends BaseEntity {
   name: any
   cat_user: any;
   createdCategories: any;
-    blockedUsers: any;
-    blockedBy: any;
+  blockedUsers: any;
+  blockedBy: any;
 
 }

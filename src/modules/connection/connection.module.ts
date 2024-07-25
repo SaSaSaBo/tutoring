@@ -19,6 +19,7 @@ import { TransactionService } from '../transaction/transaction.service';
 import { TransactionEntity } from '../transaction/transaction.entity';
 import { RequestEntity } from '../request/request.entity';
 import { BlockEntity } from '../block/block.entity';
+import { ProfileEntity } from '../profile/profile.entity';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { BlockEntity } from '../block/block.entity';
       TransactionEntity,
       RequestEntity,
       BlockEntity,
+      ProfileEntity,
     ])
   ],
   controllers: [ConnectionController],
