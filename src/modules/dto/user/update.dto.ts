@@ -22,12 +22,7 @@ export class UserUpdateDto {
 
     @IsOptional()
     phone?: string;
-
-    @IsOptional()
-    @IsArray()
-    @IsEnum(Role, { each: true })
-    role?: Role;
-
+    
     @MinLength(6)
     @MaxLength(10)
     current_password?:string;

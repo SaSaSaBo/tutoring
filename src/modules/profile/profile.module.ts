@@ -7,6 +7,8 @@ import { InOutEntity } from '../in-out/in-out.entity';
 import { ProfileEntity } from './profile.entity';
 import { ClassroomEntity } from '../classroom/classroom.entity';
 import { UserCrEntity } from '../entity/user.cr.entity';
+import { InfoEntity } from '../info/info.entity';
+import { InfoService } from '../info/info.service';
 
 @Module({
   imports: [
@@ -16,9 +18,13 @@ import { UserCrEntity } from '../entity/user.cr.entity';
       InOutEntity,
       ClassroomEntity,
       UserCrEntity,
+      InfoEntity,
     ])
   ],
   controllers: [ProfileController],
-  providers: [ProfileService]
+  providers: [
+    ProfileService,
+    InfoService,
+  ]
 })
 export class ProfileModule {}

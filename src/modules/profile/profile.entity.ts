@@ -34,4 +34,4 @@ export class ProfileEntity {
     @ManyToOne(() => UsersEntity, user => user.roles)
     roles: UsersEntity;
 
-}   
+}

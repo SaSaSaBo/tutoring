@@ -374,11 +374,6 @@ export class UserService {
         log.info = log.info ? `${log.info} Phone number has been updated.` : 'Phone number has been updated.';
       }
   
-      if (data.role && data.role !== user.roles) {
-        updateMessages.push('Users role has been changed!');
-        log.info = log.info ? `${log.info} Users role has been changed.` : 'Users role has been changed.';
-      }
-
       let hashedPassword = user.password;
       if (data.new_password) {
        if (data.new_password !== data.password_confirm) {
@@ -408,7 +403,6 @@ export class UserService {
         username: data.new_username || user.username, 
         email: data.email || user.email, 
         phone: data.phone || user.phone, 
-        roles: data.role || user.roles,
         password: hashedPassword 
       };
       await this.usersRepository.save(updatedUser);

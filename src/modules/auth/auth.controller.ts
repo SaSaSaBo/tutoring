@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpException, HttpStatus, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { RoleGuard } from '../guards/role.guard';
 import { PermissionGuard } from '../guards/permission.guard';
 import { Permissions } from '../decorator/permission.decorator';
@@ -10,6 +10,7 @@ import { AuthService } from '../auth/auth.service';
 import { AuthGuard } from '../guards/auth.guard';
 import { CreateProfileDto } from '../dto/profile/create.dto';
 import { ProfileService } from '../profile/profile.service';
+import { UpdateProfileDto } from '../dto/profile/update.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -55,6 +56,16 @@ export class AuthController {
       }
       
       return this.profileService.createProfile(data, accessToken);
+    }
+
+    @Put('update-profile')
+    async updateProfile(
+      @Body() data: UpdateProfileDto,
+      @Req() req: Request
+    ) {
+      const authHeader = req.headers['authorization'];
+      const accessToken = authHeader?.replace('Bearer ', '');
+      return this.profileService.updateProfile(data, accessToken);
     }
     
     @Post('logout')

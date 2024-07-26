@@ -18,7 +18,6 @@ export class InfoEntity {
     infoDate: Date;
 
     classroom: any
-
-
+    userProfile: any;
 
 }
