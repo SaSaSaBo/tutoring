@@ -9,5 +9,6 @@
         "Stdnt",
         "studentcount",
         "Teachs"
-    ]
+    ],
+    "DockerRun.DisableDockerrc": true
 }
