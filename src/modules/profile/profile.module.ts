@@ -9,6 +9,7 @@ import { ClassroomEntity } from '../classroom/classroom.entity';
 import { UserCrEntity } from '../entity/user.cr.entity';
 import { InfoEntity } from '../info/info.entity';
 import { InfoService } from '../info/info.service';
+import { PasswordService } from '../service/password.service';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { InfoService } from '../info/info.service';
   providers: [
     ProfileService,
     InfoService,
+    PasswordService, 
   ]
 })
 export class ProfileModule {}

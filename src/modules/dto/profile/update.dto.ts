@@ -25,4 +25,10 @@ export class UpdateProfileDto {
     @IsString()
     residence?: string;
 
+    @IsString()
+    password: string;
+
+    @IsString()
+    password_confirm: string;
+
 }

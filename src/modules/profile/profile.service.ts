@@ -12,6 +12,7 @@ import { UserCrEntity } from '../entity/user.cr.entity';
 import { UpdateProfileDto } from '../dto/profile/update.dto';
 import { InfoEntity } from '../info/info.entity';
 import { InfoService } from '../info/info.service';
+import { PasswordService } from '../service/password.service';
 
 @Injectable()
 export class ProfileService {
@@ -33,6 +34,7 @@ export class ProfileService {
         private userCrRepository: Repository<UserCrEntity>,
 
 
+        private passwordService: PasswordService,
         private infoService: InfoService,
         private jwtService: JwtService,
   ) {}
@@ -220,63 +222,73 @@ export class ProfileService {
       await this.profileRepository.save(profile);
   }
 
-  async updateProfile (data: UpdateProfileDto, accessToken: string) {
+  async updateProfile(data: UpdateProfileDto, accessToken: string) {
     const decodedToken = this.jwtService.decode(accessToken) as { username: string };
     if (!decodedToken || !decodedToken.username) {
       throw new UnauthorizedException('Invalid token');
     }
-    
+  
     // Find the user by the decoded username
     const user = await this.userRepository.findOneBy({ username: decodedToken.username });
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    
+  
     // Find the user profile by the user entity
     const userProfile = await this.profileRepository.findOne({ where: { username: user } });
     if (!userProfile) {
       throw new NotFoundException('User profile not found');
     }
-    
+  
     console.log('Service: User:', user);
     console.log('Service: Decoded Token:', decodedToken);
     console.log('Service: UserProfile:', userProfile);
-    
+  
     // Compare usernames
     if (data.username !== decodedToken.username) {
       throw new BadRequestException('Usernames do not match');
-    }   
-
+    }
+  
     const updateMessages = [];
     const log = new InfoEntity();
     log.userProfile = userProfile;
     log.user = user;
-
+  
     if (data.name) {
       updateMessages.push('Name has been changed!');
       log.info = log.info ? `${log.info} Name has been changed.` : 'Name has been changed.';
     }
-
+  
     if (data.surname) {
       updateMessages.push('Surname has been changed!');
       log.info = log.info ? `${log.info} Surname has been changed.` : 'Surname has been changed.';
     }
-
+  
     if (data.dateOfBirth) {
       updateMessages.push('Birthdate has been changed!');
       log.info = log.info ? `${log.info} Birthdate has been changed.` : 'Birthdate has been changed.';
     }
-
+  
     if (data.gender) {
       updateMessages.push('Gender has been changed!');
       log.info = log.info ? `${log.info} Gender has been changed.` : 'Gender has been changed.';
     }
-
+  
     if (data.residence) {
       updateMessages.push('Residence has been changed!');
       log.info = log.info ? `${log.info} Residence has been changed.` : 'Residence has been changed.';
     }
+  
+    // Update password if provided and matches the confirmation
+    let hashedPassword = user.password;
 
+
+    console.log('Hashed Password:', hashedPassword);
+    console.log('Password: ', data.password);
+    console.log('Password Confirm: ', data.password_confirm);
+    
+    
+  
     const updatedUser = { 
       ...userProfile, 
       name: data.name || userProfile.name, 
@@ -284,18 +296,18 @@ export class ProfileService {
       dateOfBirth: data.dateOfBirth || userProfile.dateOfBirth, 
       residence: data.residence || userProfile.residence, 
     };
-
+  
     await this.profileRepository.save(updatedUser);
-
+  
     if (log.info) {
       await this.infoService.addLog(log);
     }
-
+  
     return {
       statusCode: 200,
       message: updateMessages.length > 0 ? updateMessages.join(' ') : 'Your profile has been updated!',
     };
-
   }
+  
 
 }
