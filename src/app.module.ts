@@ -37,6 +37,7 @@ import { BlockModule } from './modules/block/block.module';
 import { BlockEntity } from './modules/block/block.entity';
 import { ProfileModule } from './modules/profile/profile.module';
 import { ProfileEntity } from './modules/profile/profile.entity';
+import { ActivationModule } from './modules/activation/activation.module';
 
 @Module({
   imports: [
@@ -70,6 +71,7 @@ import { ProfileEntity } from './modules/profile/profile.entity';
     RequestModule,
     BlockModule,
     ProfileModule,
+    ActivationModule,
   ],
   controllers: [AppController],
   providers: [

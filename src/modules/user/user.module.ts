@@ -25,6 +25,10 @@ import { RequestEntity } from '../request/request.entity';
 import { BlockEntity } from '../block/block.entity';
 import { ProfileEntity } from '../profile/profile.entity';
 import { ProfileService } from '../profile/profile.service';
+import { ActivationEntity } from '../activation/activation.entity';
+import { ActivationService } from '../activation/activation.service';
+import { EmailService } from '../service/email.service';
+import { SmsService } from '../service/sms.service';
 
 @Module({
   imports: [
@@ -40,7 +44,8 @@ import { ProfileService } from '../profile/profile.service';
       ConnectionEntity,
       RequestEntity,
       BlockEntity,
-      ProfileEntity,
+      ProfileEntity,  
+      ActivationEntity,
     ])
   ],
   controllers: [UserController],
@@ -57,6 +62,9 @@ import { ProfileService } from '../profile/profile.service';
     MessageService,
     ConnectionService,
     ProfileService,
+    ActivationService,
+    EmailService,
+    SmsService,
   ],
 })
 export class UserModule {}

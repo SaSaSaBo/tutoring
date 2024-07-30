@@ -18,10 +18,10 @@ export class EmailService {
         });
     }
 
-    async sendPasswordResetEmail(to: string, token: string) {
-        const resetLink = "http://localhost:3001/reset-password?token=" + token;
+    async sendActivationEmail(to: string, token: string) {
+        const resetLink = "http://localhost:3002/activation-mail?token=" + token;
         const mailOptions = {
-            from: 'german.hoppe@ethereal.email',
+            from: '"Tutoring" <no-reply@yourdomain.com>',
             to,
             subject: 'Activate your mail',
             text: 'Your activation link:',
@@ -30,8 +30,8 @@ export class EmailService {
 
         try {
             const info = await this.transporter.sendMail(mailOptions);
-            console.log("Activation link sented to your email.", info.messageId);
-            return { message: "Activation link sented to your email." };
+            console.log("Activation link sent to your email.", info.messageId);
+            return { message: "Activation link sent to your email." };
         } catch (error) {
             throw new Error("There been error while sending activation link. " + error.message);
         }

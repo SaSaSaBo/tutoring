@@ -34,4 +34,7 @@ export class ProfileEntity {
     @ManyToOne(() => UsersEntity, user => user.roles)
     roles: UsersEntity;
 
+    @Column({ nullable: true, default: false })
+    activationFlag: boolean;
+
 }

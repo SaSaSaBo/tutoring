@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, ParseIntPipe, Post, Put, Req, UseGuards, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpException, HttpStatus, Param, ParseIntPipe, Post, Put, Req, UseGuards, ValidationPipe } from '@nestjs/common';
 import { UserUpdateDto } from '../dto/user/update.dto';
 import { UsersDeleteDto } from '../dto/user/delete.dto';
 import { UserService } from './user.service';
@@ -11,6 +11,9 @@ import { Permissions } from '../decorator/permission.decorator';
 import { Roles } from '../decorator/role.decorator';
 import { AddStudentToClrDto } from '../dto/user/add.student.to.clr.dto';
 import { ProfileService } from '../profile/profile.service';
+import { PhoneActivationDto } from '../dto/activation/phone.dto';
+import { EmailActivationDto } from '../dto/activation/email.dto';
+import { ActivationService } from '../activation/activation.service';
 
 
 @Controller('user')
@@ -19,6 +22,7 @@ export class UserController {
     constructor(
         private userService: UserService,
         private profileService: ProfileService,
+        private activationService: ActivationService,
       ) {}
 
       @Get('all')
@@ -79,6 +83,30 @@ export class UserController {
         // addStdntToClr metodunu çağır
         return this.userService.addStdntToClr(addData, accessToken);
       }
+
+      @Post('activation-email')
+      @HttpCode(HttpStatus.OK)
+      async activationEmail(
+        @Req() req: Request,
+        @Body() emailActivationDto: EmailActivationDto) {
+          const authHeader = req.headers['authorization'];
+          const accessToken = authHeader?.replace('Bearer ', '');
+        // Email aktivasyon işlemi
+        const response = await this.activationService.activationEmail(emailActivationDto, accessToken);
+        return response;
+      }
+    
+      @Post('activation-phone')
+      @HttpCode(HttpStatus.OK)
+      async activationPhone(
+        @Req() req: Request,
+        @Body() phoneActivationDto: PhoneActivationDto) {
+          const authHeader = req.headers['authorization'];
+          const accessToken = authHeader?.replace('Bearer ', '');
+        // Telefon aktivasyon işlemi
+          const response = await this.activationService.activationPhone(phoneActivationDto, accessToken);
+          return response;
+      }
     
       @Put('update/:id')
       @UseGuards(AuthGuard, RoleGuard, PermissionGuard)
@@ -106,6 +134,5 @@ export class UserController {
           }, HttpStatus.BAD_REQUEST);
         }
       }
-    
 
 }
