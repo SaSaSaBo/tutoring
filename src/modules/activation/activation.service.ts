@@ -50,15 +50,16 @@ export class ActivationService {
     if (!user) {
       throw new NotFoundException('User not found');
     }
-  
+    
     console.log('Activation Service: User:', user);
   
     let checkProfile;
-  
+
     if (decodedToken.role.includes('student')) {
+      const user = await this.usersRepository.findOne({ where: { id: userId } });
       // Öğrenci profili ID ile bulunmalı
       checkProfile = await this.profileRepository.findOne({
-        where: { id: userId },
+        where: { username: user },
       });
   
       if (!checkProfile) {
@@ -69,9 +70,10 @@ export class ActivationService {
       }
   
     } else {
+      const user = await this.usersRepository.findOne({ where: { id: userId } });
       // Öğretmen profili ID ile bulunmalı
       checkProfile = await this.tProfileRepository.findOne({
-        where: { id: userId },
+        where: { username: user },
       });
   
       if (!checkProfile) {
@@ -175,8 +177,9 @@ export class ActivationService {
     let checkProfile;
     if (userRole.includes('student')) {
       console.log('Activation Service: Checking student profile');
+      const user = await this.usersRepository.findOne({ where: { id: userId } });
       // Öğrenci profili ID ile bulunmalı
-      checkProfile = await this.profileRepository.findOne({ where: { id: userId } });
+      checkProfile = await this.profileRepository.findOne({ where: { username: user } });
       console.log('Activation Service: Student Profile:', checkProfile);
       
       if (!checkProfile) {
@@ -187,7 +190,8 @@ export class ActivationService {
     } else {
       console.log('Activation Service: Checking teacher profile');
       // Öğretmen profili ID ile bulunmalı
-      checkProfile = await this.tProfileRepository.findOne({ where: { id: userId } });
+      const user = await this.usersRepository.findOne({ where: { id: userId } });
+      checkProfile = await this.tProfileRepository.findOne({ where: { username: user } });
       console.log('Activation Service: Teacher Profile:', checkProfile);
       
       if (!checkProfile) {
@@ -270,6 +274,5 @@ export class ActivationService {
     
     return { message: 'Activation code sent to your phone.' };
   }
-  
 
 }
