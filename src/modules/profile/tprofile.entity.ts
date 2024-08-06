@@ -1,8 +1,9 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { UsersEntity } from '../user/user.entity';
+import { Place } from '../enum/place.enum';
 
-@Entity('profile')
-export class ProfileEntity {
+@Entity('tprofile')
+export class TProfileEntity {
 
     @PrimaryGeneratedColumn()
     id: number;
@@ -22,14 +23,29 @@ export class ProfileEntity {
     @Column({ nullable: true })
     gender: string;
 
-    @Column({ nullable: true })
-    residence: string;
-
     @ManyToOne(() => UsersEntity, user => user.phone)
     phone: UsersEntity;
 
     @ManyToOne(() => UsersEntity, user => user.email)
     email: UsersEntity;
+    @Column({ nullable: true })
+    alma_mater: string;
+
+    @Column({ nullable: true })
+    area: string;
+
+    @Column({ type: 'text' })
+    explanation: string;
+
+    @Column({ 
+        type: 'enum', 
+        enum: Place, 
+        default: Place.Online 
+    })
+    place: Place;
+
+    @Column({ nullable: true })
+    price: string;
 
     @Column({ nullable: true, default: false })
     activationFlag: boolean;

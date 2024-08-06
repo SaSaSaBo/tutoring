@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { CreateProfileDto } from '../dto/profile/create.dto';
+import { CreateProfileDto, CreateTProfileDto } from '../dto/profile/create.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsersEntity } from '../user/user.entity';
 import { In, Repository } from 'typeorm';
@@ -13,6 +13,7 @@ import { UpdateProfileDto } from '../dto/profile/update.dto';
 import { InfoEntity } from '../info/info.entity';
 import { InfoService } from '../info/info.service';
 import { PasswordService } from '../service/password.service';
+import { TProfileEntity } from './tprofile.entity';
 
 @Injectable()
 export class ProfileService {
@@ -33,6 +34,9 @@ export class ProfileService {
         @InjectRepository(UserCrEntity)
         private userCrRepository: Repository<UserCrEntity>,
 
+        @InjectRepository(TProfileEntity)
+        private tProfileRepository: Repository<TProfileEntity>,
+
 
         private passwordService: PasswordService,
         private infoService: InfoService,
@@ -43,169 +47,201 @@ export class ProfileService {
     return this.userRepository.find();
   }
 
-  async findAllStudents(accessToken: string) {
-    const decodedToken: any = this.jwtService.decode(accessToken);
-    const userId = decodedToken.sub;
+  // async findAllStudents(accessToken: string) {
+  //   const decodedToken: any = this.jwtService.decode(accessToken);
+  //   const userId = decodedToken.sub;
 
-    if (!userId) {
-      throw new InternalServerErrorException('Invalid token or user ID not found.');
-    }
+  //   if (!userId) {
+  //     throw new InternalServerErrorException('Invalid token or user ID not found.');
+  //   }
 
-    // Kullanıcının oluşturduğu sınıfları bulun
-    const classrooms = await this.classroomRepository
-      .createQueryBuilder('classroom')
-      .where('classroom.creatorId = :userId', { userId })
-      .getMany();
+  //   // Kullanıcının oluşturduğu sınıfları bulun
+  //   const classrooms = await this.classroomRepository
+  //     .createQueryBuilder('classroom')
+  //     .where('classroom.creatorId = :userId', { userId })
+  //     .getMany();
 
-    if (classrooms.length === 0) {
-      throw new InternalServerErrorException('No classrooms found for this user.');
-    }
+  //   if (classrooms.length === 0) {
+  //     throw new InternalServerErrorException('No classrooms found for this user.');
+  //   }
 
-    console.log('Classrooms:', classrooms);
+  //   console.log('Classrooms:', classrooms);
 
-    // Get student-class relations
-    const studentClassRelations = await this.userCrRepository
-      .createQueryBuilder('user_cr')
-      .leftJoinAndSelect('user_cr.user', 'user')
-      .where('user_cr.classroomId IN (:...classroomIds)', { classroomIds: classrooms.map(c => c.id) })
-      .andWhere('user.roles = :role', { role: Role.Student })
-      .getMany();
+  //   // Get student-class relations
+  //   const studentClassRelations = await this.userCrRepository
+  //     .createQueryBuilder('user_cr')
+  //     .leftJoinAndSelect('user_cr.user', 'user')
+  //     .where('user_cr.classroomId IN (:...classroomIds)', { classroomIds: classrooms.map(c => c.id) })
+  //     .andWhere('user.roles = :role', { role: Role.Student })
+  //     .getMany();
 
-    console.log('studentClassRelations:', studentClassRelations);
+  //   console.log('studentClassRelations:', studentClassRelations);
 
-    // Extract student IDs from studentClassRelations
-    const studentUsernames: string[] = studentClassRelations.map(relation => {
-      // Eğer relation.user.username bir UsersEntity ise, ona erişim sağlayalım
-      if (relation.user.username && typeof relation.user.username === 'object') {
-        return relation.user.username || ''; // UsersEntity içindeki username alanına erişim
-      }
-      return ''; // Eğer kullanıcı yoksa boş döndür
-    }).filter(username => username !== '');
+  //   // Extract student IDs from studentClassRelations
+  //   const studentUsernames: string[] = studentClassRelations.map(relation => {
+  //     // Eğer relation.user.username bir UsersEntity ise, ona erişim sağlayalım
+  //     if (relation.user.username && typeof relation.user.username === 'object') {
+  //       return relation.user.username || ''; // UsersEntity içindeki username alanına erişim
+  //     }
+  //     return ''; // Eğer kullanıcı yoksa boş döndür
+  //   }).filter(username => username !== '');
 
-    console.log('studentUsernames:', studentUsernames);
+  //   console.log('studentUsernames:', studentUsernames);
     
-    const profiles = await this.profileRepository
-      .createQueryBuilder('profile')
-      .leftJoinAndSelect('profile.username', 'user') // İlişki adı doğru olduğundan emin olun
-      .where('user.roles = :role', { role: Role.Student })
-      .select(['profile.id', 'profile.name', 'profile.surname', 'profile.dateOfBirth', 'profile.gender', 'user.username'])
-      .getMany();
+  //   const profiles = await this.profileRepository
+  //     .createQueryBuilder('profile')
+  //     .leftJoinAndSelect('profile.username', 'user') // İlişki adı doğru olduğundan emin olun
+  //     .where('user.roles = :role', { role: Role.Student })
+  //     .select(['profile.id', 'profile.name', 'profile.surname', 'profile.dateOfBirth', 'profile.gender', 'user.username'])
+  //     .getMany();
 
-    console.log('All Profiles That Are Students:', profiles);
+  //   console.log('All Profiles That Are Students:', profiles);
 
-      const completedProfiles = profiles.filter(profile =>
-      profile.name && profile.surname && profile.dateOfBirth && profile.gender
-    );
+  //     const completedProfiles = profiles.filter(profile =>
+  //     profile.name && profile.surname && profile.dateOfBirth && profile.gender
+  //   );
 
-    console.log('Completed Profiles:', completedProfiles); // Debug log
+  //   console.log('Completed Profiles:', completedProfiles); // Debug log
 
-    const incompletedProfiles = studentClassRelations.filter(relation => {
-      const username = relation.user.username; // Username direkt burada string olsa bu şekilde kullanacağız
-      return username && !profiles.some(profile => profile.username.username === username);
-    });
+  //   const incompletedProfiles = studentClassRelations.filter(relation => {
+  //     const username = relation.user.username; // Username direkt burada string olsa bu şekilde kullanacağız
+  //     return username && !profiles.some(profile => profile.username.username === username);
+  //   });
 
 
-  // Sonuçları konsola yazdır
-  console.log('incompletedProfiles:', incompletedProfiles);
+  // // Sonuçları konsola yazdır
+  // console.log('incompletedProfiles:', incompletedProfiles);
 
-    return {
-      completedProfiles,
-      incompletedProfiles,
-      message: incompletedProfiles.length > 0 
-        ? 'There are students with incomplete profiles.'
-        : 'All student profiles are complete.' 
-    };
-  }
+  //   return {
+  //     completedProfiles,
+  //     incompletedProfiles,
+  //     message: incompletedProfiles.length > 0 
+  //       ? 'There are students with incomplete profiles.'
+  //       : 'All student profiles are complete.' 
+  //   };
+  // }
 
-  async findAllTeachers(): Promise<{ completedProfiles: ProfileEntity[], incompleteProfiles: ProfileEntity[], message: string }> {
-    // Tüm profilleri öğretmenlerle birlikte getir
-    const profiles = await this.profileRepository
-      .createQueryBuilder('profile')
-      .leftJoinAndSelect('profile.username', 'user') // İlişki adı doğru olduğundan emin olun
-      .where('user.roles = :role', { role: Role.Teacher })
-      .select(['profile.id', 'profile.name', 'profile.surname', 'profile.dateOfBirth', 'profile.gender', 'user.username'])
-      .getMany();
+  // async findAllTeachers(): Promise<{ completedProfiles: ProfileEntity[], incompleteProfiles: ProfileEntity[], message: string }> {
+  //   // Tüm profilleri öğretmenlerle birlikte getir
+  //   const profiles = await this.profileRepository
+  //     .createQueryBuilder('profile')
+  //     .leftJoinAndSelect('profile.username', 'user') // İlişki adı doğru olduğundan emin olun
+  //     .where('user.roles = :role', { role: Role.Teacher })
+  //     .select(['profile.id', 'profile.name', 'profile.surname', 'profile.dateOfBirth', 'profile.gender', 'user.username'])
+  //     .getMany();
 
-    console.log('All Profiles That Are Teachers:', profiles);
+  //   console.log('All Profiles That Are Teachers:', profiles);
 
-    // Kullanıcıları öğretmen rollerine göre al
-    const users = await this.userRepository.find({
-      where: { roles: Role.Teacher },
-    });
-    console.log('Users:', users);
+  //   // Kullanıcıları öğretmen rollerine göre al
+  //   const users = await this.userRepository.find({
+  //     where: { roles: Role.Teacher },
+  //   });
+  //   console.log('Users:', users);
 
-    // Eksik profiller için bir dizi oluştur
-    const incompleteProfiles: ProfileEntity[] = [];
+  //   // Eksik profiller için bir dizi oluştur
+  //   const incompleteProfiles: ProfileEntity[] = [];
 
-    // Kullanıcılar arasında eksik profilleri belirle
-    users.forEach(user => {
-      const profile = profiles.find(profile => profile.username.username === user.username);
+  //   // Kullanıcılar arasında eksik profilleri belirle
+  //   users.forEach(user => {
+  //     const profile = profiles.find(profile => profile.username.username === user.username);
 
-      if (!profile || !profile.name || !profile.surname || !profile.dateOfBirth || !profile.gender) {
-        incompleteProfiles.push({
-          id: profile?.id ?? null,
-          name: profile?.name ?? '',
-          surname: profile?.surname ?? '',
-          dateOfBirth: profile?.dateOfBirth ? new Date(profile.dateOfBirth) : new Date(), // Varsayılan tarih
-          gender: profile?.gender ?? '',
-          username: user, // Kullanıcı nesnesini doğrudan kullanın
-          residence: profile?.residence ?? '', // Eksik olan diğer özellikler
-          phone: profile?.phone ?? '', // Varsayılan değerler ekleyin
-          email: profile?.email ?? '',
-          roles: profile?.roles ?? ''
-        } as ProfileEntity); // ProfileEntity türüne dönüştür
-      }
-    });
+  //     if (!profile || !profile.name || !profile.surname || !profile.dateOfBirth || !profile.gender) {
+  //       incompleteProfiles.push({
+  //         id: profile?.id ?? null,
+  //         name: profile?.name ?? '',
+  //         surname: profile?.surname ?? '',
+  //         dateOfBirth: profile?.dateOfBirth ? new Date(profile.dateOfBirth) : new Date(), // Varsayılan tarih
+  //         gender: profile?.gender ?? '',
+  //         username: user, // Kullanıcı nesnesini doğrudan kullanın
+  //         residence: profile?.residence ?? '', // Eksik olan diğer özellikler
+  //         phone: profile?.phone ?? '', // Varsayılan değerler ekleyin
+  //         email: profile?.email ?? '',
+  //         roles: profile?.roles ?? ''
+  //       } as ProfileEntity); // ProfileEntity türüne dönüştür
+  //     }
+  //   });
 
-    // Tamamlanmış profilleri oluştur
-    const completedProfiles = profiles.filter(profile =>
-      profile.name && profile.surname && profile.dateOfBirth && profile.gender
-    );
+  //   // Tamamlanmış profilleri oluştur
+  //   const completedProfiles = profiles.filter(profile =>
+  //     profile.name && profile.surname && profile.dateOfBirth && profile.gender
+  //   );
 
-    console.log('Completed Profiles:', completedProfiles); // Debug log
-    console.log('Incomplete Profiles:', incompleteProfiles); // Debug log
+  //   console.log('Completed Profiles:', completedProfiles); // Debug log
+  //   console.log('Incomplete Profiles:', incompleteProfiles); // Debug log
 
-    // Sonuçları döndür
-    return {
-      completedProfiles,
-      incompleteProfiles,
-      message: incompleteProfiles.length > 0 
-        ? 'There are users with incomplete profiles.'
-        : 'All profiles are complete.' 
-    };
-  }
+  //   // Sonuçları döndür
+  //   return {
+  //     completedProfiles,
+  //     incompleteProfiles,
+  //     message: incompleteProfiles.length > 0 
+  //       ? 'There are users with incomplete profiles.'
+  //       : 'All profiles are complete.' 
+  //   };
+  // }
  
-  async createProfile(data: CreateProfileDto, accessToken: string) {
-      const decodedToken = this.jwtService.decode(accessToken);
-      const user = await this.userRepository.findOneBy({ id: decodedToken.sub });
+  async createProfile(data: CreateProfileDto & CreateTProfileDto, accessToken: string) {
+    const decodedToken = this.jwtService.decode(accessToken);
+    const user = await this.userRepository.findOneBy({ id: decodedToken.sub });
 
       console.log('Service: Decoded Token:', decodedToken);
         
       console.log('Service: User:', user);
   
-      if (!user) {
-        throw new NotFoundException('User not found');
-      }
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
 
-      const check = await this.userRepository.findOne({ where: { username: data.username } });
+    const check = await this.userRepository.findOne({ where: { username: data.username } });
 
-      if (check.username !== decodedToken.username) {
-        throw new NotFoundException('User\'s username do not match!');
-      }
+    if (check.username !== decodedToken.username) {
+      throw new NotFoundException('User\'s username do not match!');
+    }
                 
-      const isActive = await this.inOutRepository.findOneBy({ user: user, inOut: 'login' });
-      if (!isActive) {
-        throw new Error('User must be logged in first!');
-      }
-
-      const exists = await this.profileRepository.findOne({ where: { name: data.name } });
-
-      if (exists) {
-        throw new NotFoundException('Profile already exists!');
-      }
+    const isActive = await this.inOutRepository.findOneBy({ user: user, inOut: 'login' });
+    if (!isActive) {
+      throw new Error('User must be logged in first!');
+    }
 
       console.log('IsActive:', isActive);
         
+    if (decodedToken.role === 'teacher') {
+        // Check if a teacher profile already exists
+      const exists = await this.tProfileRepository.findOne({ where: { name: data.name } });
+    
+      if (exists) {
+        throw new NotFoundException('Teacher profile already exists!');
+      }
+    
+        console.log('Exists:', exists);
+    
+        // Create a new teacher profile
+      const tProfile = new TProfileEntity();
+      tProfile.username = user;
+      tProfile.name = data.name;
+      tProfile.surname = data.surname;
+      tProfile.dateOfBirth = data.dateOfBirth;
+      tProfile.gender = data.gender;
+      tProfile.phone = user;
+      tProfile.email = user;
+      tProfile.alma_mater = data.alma_mater;
+      tProfile.area = data.area;
+      tProfile.explanation = data.explanation;
+      tProfile.place = data.place;
+      tProfile.price = data.price;
+    
+        console.log('TProfile:', tProfile);
+    
+      await this.tProfileRepository.save(tProfile);
+    } else {
+        // Check if a regular profile already exists
+      const exists = await this.profileRepository.findOne({ where: { name: data.name } });
+    
+      if (exists) {
+        throw new NotFoundException('Profile already exists!');
+      }
+    
+        console.log('Exists:', exists);
+      
       const profile = new ProfileEntity();
       profile.username = user;
       profile.name = data.name;
@@ -215,11 +251,11 @@ export class ProfileService {
       profile.residence = data.residence;
       profile.phone = user;
       profile.email = user;
-      profile.roles = user;
 
       console.log('Profile:', profile);      
 
       await this.profileRepository.save(profile);
+      }
   }
 
   async updateProfile(data: UpdateProfileDto, accessToken: string) {
@@ -309,5 +345,4 @@ export class ProfileService {
     };
   }
   
-
 }

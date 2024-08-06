@@ -20,6 +20,7 @@ import { ClassroomEntity } from '../classroom/classroom.entity';
 import { RequestEntity } from '../request/request.entity';
 import { ProfileService } from '../profile/profile.service';
 import { ProfileEntity } from '../profile/profile.entity';
+import { TProfileEntity } from '../profile/tprofile.entity';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { ProfileEntity } from '../profile/profile.entity';
       ClassroomEntity,
       RequestEntity,
       ProfileEntity,
+      TProfileEntity,
     ]),
     JwtModule.register({
       global: true,

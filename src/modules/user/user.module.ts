@@ -29,6 +29,7 @@ import { ActivationEntity } from '../activation/activation.entity';
 import { ActivationService } from '../activation/activation.service';
 import { EmailService } from '../service/email.service';
 import { SmsService } from '../service/sms.service';
+import { TProfileEntity } from '../profile/tprofile.entity';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { SmsService } from '../service/sms.service';
       BlockEntity,
       ProfileEntity,  
       ActivationEntity,
+      TProfileEntity,
     ])
   ],
   controllers: [UserController],

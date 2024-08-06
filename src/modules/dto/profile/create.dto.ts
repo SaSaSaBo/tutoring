@@ -1,4 +1,5 @@
-import { IsString } from 'class-validator';
+import { IsEnum, IsString } from 'class-validator';
+import { Place } from 'src/modules/enum/place.enum';
 export class CreateProfileDto {
 
     @IsString()
@@ -20,3 +21,25 @@ export class CreateProfileDto {
     residence: string;
     
 }
+
+export class CreateTProfileDto {
+    @IsString()
+    alma_mater: string;
+  
+    @IsString()
+    area: string;
+  
+    @IsString()
+    explanation: string;
+  
+    @IsEnum({
+        enum: Place
+    })
+    place: Place;
+  
+    @IsString()
+    price: string;
+
+
+}
+  

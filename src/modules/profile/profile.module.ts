@@ -10,6 +10,7 @@ import { UserCrEntity } from '../entity/user.cr.entity';
 import { InfoEntity } from '../info/info.entity';
 import { InfoService } from '../info/info.service';
 import { PasswordService } from '../service/password.service';
+import { TProfileEntity } from './tprofile.entity';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { PasswordService } from '../service/password.service';
       ClassroomEntity,
       UserCrEntity,
       InfoEntity,
+      TProfileEntity,
     ])
   ],
   controllers: [ProfileController],

@@ -8,7 +8,7 @@ import { UserRegisterDto } from '../dto/user/register.dto';
 import { UserLoginDto } from '../dto/user/login.dto';
 import { AuthService } from '../auth/auth.service';
 import { AuthGuard } from '../guards/auth.guard';
-import { CreateProfileDto } from '../dto/profile/create.dto';
+import { CreateProfileDto, CreateTProfileDto } from '../dto/profile/create.dto';
 import { ProfileService } from '../profile/profile.service';
 import { UpdateProfileDto } from '../dto/profile/update.dto';
 
@@ -43,7 +43,7 @@ export class AuthController {
 
     @Post('profile')
     async profile(
-      @Body() data: CreateProfileDto,
+      @Body() data: CreateProfileDto & CreateTProfileDto, 
       @Req() req: Request
     ) {
       const authHeader = req.headers['authorization'];

@@ -8,7 +8,8 @@
         "requestee",
         "Stdnt",
         "studentcount",
-        "Teachs"
+        "Teachs",
+        "tprofile"
     ],
     "DockerRun.DisableDockerrc": true
 }

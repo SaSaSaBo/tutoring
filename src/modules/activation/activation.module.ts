@@ -7,6 +7,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { EmailService } from '../service/email.service';
 import { SmsService } from '../service/sms.service';
 import { ProfileEntity } from '../profile/profile.entity';
+import { TProfileEntity } from '../profile/tprofile.entity';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { ProfileEntity } from '../profile/profile.entity';
       ActivationEntity, 
       UsersEntity,
       ProfileEntity,
+      TProfileEntity,
     ]),
   ],
   controllers: [ActivationController],
