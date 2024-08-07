@@ -1,4 +1,3 @@
-import { roles } from './../enum/role.enum';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { EmailActivationDto } from '../dto/activation/email.dto';
 import { PhoneActivationDto } from '../dto/activation/phone.dto';
@@ -202,8 +201,7 @@ export class ActivationService {
     
     if (!checkProfile) {
       throw new NotFoundException('Profile not found!');
-    }
-    
+    }    
       
     console.log('Activation Service: 1st checkProfile:', checkProfile);
   
