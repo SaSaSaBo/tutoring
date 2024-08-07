@@ -20,13 +20,20 @@ export class ConnectionService {
   ) {}
 
   async sendConnection(requester: UsersEntity, requestee: UsersEntity, sendData: SendConnectionDto): Promise<ConnectionEntity> {
+    const blockresponse = await this.blockRepository.find();
+    console.log('blockresponse: ', blockresponse);
+
+    const connectionResponse = await this.connectionRepository.find();
+    console.log('connectionResponse: ', connectionResponse);
+
     // Aktif blok kayıtlarını kontrol et
     const activeBlocks = await this.blockRepository.find({
-        where: [
-            { blocker: { id: requester.id }, blocked: { id: requestee.id }, unblockedDate: null },
-            { blocker: { id: requestee.id }, blocked: { id: requester.id }, unblockedDate: null }
-        ],
-    });
+      where: [
+          { blocker: { id: requester.id }, blocked: { id: requestee.id }, unblockedDate: null },
+          { blocker: { id: requestee.id }, blocked: { id: requester.id }, unblockedDate: null }
+      ],
+  });
+  
 
     console.log('activeBlocks: ', activeBlocks);
 
@@ -35,12 +42,15 @@ export class ConnectionService {
     }
 
     const existingConnection = await this.connectionRepository.findOne({
-        where: [
-            { requester: { id: requester.id }, requestee: { id: requestee.id }, deletedAt: null },
-            { requester: { id: requestee.id }, requestee: { id: requester.id }, deletedAt: null }
-        ],
-        relations: ['requester', 'requestee']
-    });
+      where: [
+          { requester: { id: requester.id }, requestee: { id: requestee.id }, deletedAt: null },
+          { requester: { id: requestee.id }, requestee: { id: requester.id }, deletedAt: null }
+      ],
+      relations: ['requester', 'requestee']
+  });
+  
+
+    console.log('existingConnection: ', existingConnection);
 
     if (existingConnection) {
         throw new ConflictException('A connection request already exists between these users.');
@@ -56,6 +66,7 @@ export class ConnectionService {
 
     return this.connectionRepository.save(connection);
 }
+
 
 
   async acceptConnection(requesteeId: UsersEntity, requesterId: UsersEntity, acceptData: AcceptConnectionDto): Promise<ConnectionEntity> {        
