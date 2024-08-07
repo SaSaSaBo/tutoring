@@ -58,5 +58,6 @@ export class TProfileEntity {
 
     ownerId: any;
     classroom: any;
+    priLes: any;
 
 }
