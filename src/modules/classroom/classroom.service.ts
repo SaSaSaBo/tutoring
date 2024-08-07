@@ -27,28 +27,37 @@ export class ClassroomService {
         private infoService: InfoService,
         private jwtService: JwtService
     ) {}
+    
+    async getClassroomsForTeachs(accessToken: string) {
+        // Decode and verify JWT token
+        const decodedToken = this.jwtService.verify(accessToken);
+        const userId = decodedToken['sub'];
 
-    async getClassroomsForTeachs(userId: number) {
-        try {
-            return await this.userCrRepository
-            .createQueryBuilder('userCr')
-            .innerJoinAndSelect('userCr.user', 'user')
-            .innerJoinAndSelect('userCr.classroom', 'classroom')
-            .where('userCr.addedBy = :userId', { userId })
-            .getMany();
-        
-        } catch (error) {
-            console.error('Error decoding token:', error);
-            throw new Error('Failed to decode token');
-        }
-    }
-
-    async getClassroomsForStdnt() {
-        return await this.classroomRepository.find({
-            relations: ['creator'],
+        // Fetch classrooms where the creator is the user with the given ID
+        const classrooms = await this.classroomRepository.find({
+            where: { creator: { id: userId } },
+            relations: ['creator', 'category'], // Include relations as needed
         });
+
+        // Filter and return only specific fields
+        return classrooms.map(({ cr_name, capability, price }) => ({
+            cr_name,
+            capability,
+            price,
+        }));
     }
 
+   async getClassroomsForStdnt() {
+        return await this.classroomRepository.createQueryBuilder('classroom')
+            .leftJoinAndSelect('classroom.creator', 'creator')
+            .select([
+                'classroom.cr_name',
+                'classroom.price',
+                'creator.username', // veya başka bir creator alanı
+            ])
+            .getMany();
+    }
+    
     async createClassroom(createData: CreateCRDto, accessToken: string): Promise<ClassroomEntity> {
         try {
             console.log('AccessToken: ', accessToken);
@@ -102,6 +111,7 @@ export class ClassroomService {
             const classroom = new ClassroomEntity();
             classroom.cr_name = createData.cr_name;
             classroom.capability = createData.capability;
+            classroom.price = createData.price;
             classroom.creator = user; // Correctly set the creator relation
             classroom.category = category; // Correctly set the category relation
     

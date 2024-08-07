@@ -24,6 +24,9 @@ export class ClassroomEntity {
 
     @CreateDateColumn()
     created_at: Date;    
+    
+    @Column({ nullable: true })
+    price: string;
 
     @DeleteDateColumn({
         name: 'deleted_at',
@@ -32,5 +35,6 @@ export class ClassroomEntity {
         default: null,
     })
     deletedAt: Date;
-  classroomId: any;
+
+    classroomId: any;
 }

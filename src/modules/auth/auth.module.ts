@@ -21,6 +21,7 @@ import { RequestEntity } from '../request/request.entity';
 import { ProfileService } from '../profile/profile.service';
 import { ProfileEntity } from '../profile/profile.entity';
 import { TProfileEntity } from '../profile/tprofile.entity';
+import { ConnectionEntity } from '../connection/connection.entity';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { TProfileEntity } from '../profile/tprofile.entity';
       RequestEntity,
       ProfileEntity,
       TProfileEntity,
+      ConnectionEntity,
     ]),
     JwtModule.register({
       global: true,

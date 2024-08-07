@@ -1,5 +1,6 @@
 import {
     BadRequestException,
+    ForbiddenException,
     HttpException,
     HttpStatus,
     Injectable,
@@ -24,6 +25,8 @@ import { AddStudentToClrDto } from '../dto/user/add.student.to.clr.dto';
 import { JwtService } from '@nestjs/jwt';
 import { UserCrEntity } from '../entity/user.cr.entity';
 import { RequestEntity } from '../request/request.entity';
+import { PhoneVisibility } from '../enum/visibility.enum';
+import { ConnectionEntity } from '../connection/connection.entity';
 
 @Injectable()
 export class UserService {
@@ -49,6 +52,10 @@ export class UserService {
 
     @InjectRepository(RequestEntity)
     private requestRepository: Repository<RequestEntity>,
+
+    @InjectRepository(ConnectionEntity)
+    private connectionRepository: Repository<ConnectionEntity>,
+
   
     private jwtService: JwtService,
     private infoService: InfoService,
@@ -470,5 +477,75 @@ export class UserService {
   
     return user.categories.some((category) => category.id === categoryId);
   }
+/*
+  async getUserPhone(userId: number, viewerId: number): Promise<string> {
+  const user = await this.usersRepository.findOne({ where: { id: userId } });
+  if (!user) throw new NotFoundException('User not found');
 
+    const viewer = await this.usersRepository.findOne({ where: { id: viewerId } });
+    if (!viewer) throw new NotFoundException('Viewer not found');
+
+    if (user.roles !== Role.Teacher) {
+      throw new ForbiddenException('Phone number is only visible for teachers');
+    }
+
+    switch (user.phoneVisibility) {
+      case PhoneVisibility.Everyone:
+        return user.phone;
+      case PhoneVisibility.AllStudents:
+        if (viewer.roles === Role.Student) return user.phone;
+        break;
+      case PhoneVisibility.MyStudents:
+        if (await this.isMyStudent(user, viewer)) return user.phone;
+        break;
+      case PhoneVisibility.ApprovedOnly:
+        if (await this.isApproved(user, viewer)) return user.phone;
+        break;
+    }
+    throw new ForbiddenException('You do not have permission to view this phone number');
+  }
+
+  private async isMyStudent(teacher: UsersEntity, student: UsersEntity): Promise<boolean> {
+    const relationship = await this.connectionRepository.findOne({ where: { requester: teacher, requestee: student, accepted: true } });
+    return !!relationship;
+  }
+
+  private async isApproved(teacher: UsersEntity, student: UsersEntity): Promise<boolean> {
+    const relationship = await this.connectionRepository.findOne({ where: { requester: teacher, requestee: student, accepted: true } });
+    return !!relationship;
+  }
+
+  async sharePhone(teacherId: number, studentId: number): Promise<void> {
+    const teacher = await this.usersRepository.findOne({ where: { id: teacherId } });
+    const student = await this.usersRepository.findOne({ where: { id: studentId } });
+
+    if (!teacher || !student) throw new NotFoundException('User not found');
+
+    const relationship = await this.connectionRepository.findOne({ where: { requester: teacher, requestee: student } });
+    if (!relationship) throw new NotFoundException('Relationship not found');
+
+    relationship.accepted = true;
+    await this.connectionRepository.save(relationship);
+    await this.createLog('Phone shared', teacherId, studentId);
+  }
+
+  async unsharePhone(teacherId: number, studentId: number): Promise<void> {
+    const teacher = await this.usersRepository.findOne({ where: { id: teacherId } });
+    const student = await this.usersRepository.findOne({ where: { id: studentId } });
+
+    if (!teacher || !student) throw new NotFoundException('User not found');
+
+    const relationship = await this.connectionRepository.findOne({ where: { requester: teacher, requestee: student } });
+    if (!relationship) throw new NotFoundException('Relationship not found');
+
+    relationship.accepted = false;
+    await this.connectionRepository.save(relationship);
+    await this.createLog('Phone unshared', teacherId, studentId);
+  }
+
+  private async createLog(action: string, teacherId: number, studentId: number): Promise<void> {
+    // Log oluşturma işlemi burada yapılır
+    // Örnek: logService.createLog({ action, teacherId, studentId, timestamp: new Date() });
+  }
+*/
 }

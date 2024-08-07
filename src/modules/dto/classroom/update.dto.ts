@@ -10,4 +10,8 @@ export class UpdateCRDto {
     @IsNumber()
     new_capacity?: number;
 
+    @IsOptional()
+    @IsString()
+    new_price?: string;
+    
 }

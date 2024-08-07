@@ -9,9 +9,11 @@ export class CreateCRDto {
     @IsNumber()
     capability: number;
 
-    @IsOptional()
     @IsNumber()
-    categoryId?: number; // Change to number type
+    categoryId: number; // Change to number type
+
+    @IsString()
+    price: string;
 
     toEntity(): ClassroomEntity {
         const classroom = new ClassroomEntity();

@@ -11,6 +11,8 @@ import { InfoEntity } from '../info/info.entity';
 import { InfoService } from '../info/info.service';
 import { PasswordService } from '../service/password.service';
 import { TProfileEntity } from './tprofile.entity';
+import { LogService } from '../service/log.service';
+import { ConnectionEntity } from '../connection/connection.entity';
 
 @Module({
   imports: [
@@ -22,6 +24,7 @@ import { TProfileEntity } from './tprofile.entity';
       UserCrEntity,
       InfoEntity,
       TProfileEntity,
+      ConnectionEntity,
     ])
   ],
   controllers: [ProfileController],
@@ -29,6 +32,7 @@ import { TProfileEntity } from './tprofile.entity';
     ProfileService,
     InfoService,
     PasswordService, 
+    LogService,
   ]
 })
 export class ProfileModule {}

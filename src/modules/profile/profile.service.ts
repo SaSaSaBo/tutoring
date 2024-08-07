@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateProfileDto, CreateTProfileDto } from '../dto/profile/create.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsersEntity } from '../user/user.entity';
@@ -6,7 +6,6 @@ import { In, Repository } from 'typeorm';
 import { ProfileEntity } from './profile.entity';
 import { InOutEntity } from '../in-out/in-out.entity';
 import { JwtService } from '@nestjs/jwt';
-import { Role } from '../enum/role.enum';
 import { ClassroomEntity } from '../classroom/classroom.entity';
 import { UserCrEntity } from '../entity/user.cr.entity';
 import { UpdateProfileDto } from '../dto/profile/update.dto';
@@ -14,6 +13,9 @@ import { InfoEntity } from '../info/info.entity';
 import { InfoService } from '../info/info.service';
 import { PasswordService } from '../service/password.service';
 import { TProfileEntity } from './tprofile.entity';
+import { PhoneVisibility } from '../enum/visibility.enum';
+import { Role } from '../enum/role.enum';
+import { ConnectionEntity } from '../connection/connection.entity';
 
 @Injectable()
 export class ProfileService {
@@ -37,6 +39,9 @@ export class ProfileService {
         @InjectRepository(TProfileEntity)
         private tProfileRepository: Repository<TProfileEntity>,
 
+        @InjectRepository(ConnectionEntity)
+        private connectionRepository: Repository<ConnectionEntity>,
+
 
         private passwordService: PasswordService,
         private infoService: InfoService,
@@ -47,138 +52,191 @@ export class ProfileService {
     return this.userRepository.find();
   }
 
-  // async findAllStudents(accessToken: string) {
-  //   const decodedToken: any = this.jwtService.decode(accessToken);
-  //   const userId = decodedToken.sub;
+  async findAllStudents(accessToken: string) {
+    const decodedToken: any = this.jwtService.decode(accessToken);
+    const userId = decodedToken.sub;
+  
+    if (!userId) {
+      throw new InternalServerErrorException('Invalid token or user ID not found.');
+    }
+  
+    // Kullanıcının oluşturduğu sınıfları bulun
+    const classrooms = await this.classroomRepository
+      .createQueryBuilder('classroom')
+      .where('classroom.creatorId = :userId', { userId })
+      .getMany();
+  
+    if (classrooms.length === 0) {
+      throw new InternalServerErrorException('No classrooms found for this user.');
+    }
+  
+    console.log('Classrooms:', classrooms);
+  
+    // Get student-class relations
+    const studentClassRelations = await this.userCrRepository
+      .createQueryBuilder('user_cr')
+      .leftJoinAndSelect('user_cr.user', 'user')
+      .leftJoinAndSelect('user_cr.classroom', 'classroom')
+      .where('user_cr.classroom.id IN (:...classroomIds)', { classroomIds: classrooms.map(c => c.id) })
+      .andWhere('user.roles = :role', { role: Role.Student })
+      .getMany();
+  
+    console.log('studentClassRelations:', studentClassRelations);
+  
+    // Extract student usernames
+    const studentUsernames: string[] = studentClassRelations.map(relation => {
+      return relation.user.username || ''; // Username içeriğini al
+    }).filter(username => username !== '');
+  
+    console.log('studentUsernames:', studentUsernames);
+  
+    // Kullanıcı profillerini alın
+    const profiles = await this.profileRepository
+      .createQueryBuilder('profile')
+      .leftJoinAndSelect('profile.username', 'user')
+      .where('user.roles = :role', { role: Role.Student })
+      .select(['profile.id', 'profile.name', 'profile.surname', 'profile.dateOfBirth', 'profile.gender', 'user.username'])
+      .getMany();
+  
+    console.log('All Profiles That Are Students:', profiles);
+  
+    // Tamamlanmış profilleri filtrele
+    const completedProfiles = profiles.filter(profile =>
+      profile.name && profile.surname && profile.dateOfBirth && profile.gender
+    );
+  
+    console.log('Completed Profiles:', completedProfiles); // Debug log
+  
+    // Eksik profiller için dizi oluştur
+    const incompletedProfiles = studentClassRelations.filter(relation => {
+      const username = relation.user.username;
+      return username && !profiles.some(profile => profile.username.username === username);
+    });
+  
+    // Eksik profilleri ve sınıfları bağlayın
+    const incompletedProfilesWithClasses = incompletedProfiles.map(relation => {
+      return {
+        id: relation.user.id,
+        user: relation.user,
+        classrooms: classrooms.filter(classroom => 
+          studentClassRelations.some(rel => rel.user.id === relation.user.id && rel.classroom.id === classroom.id)
+        )
+      };
+    });
+  
+    // Tamamlanmış profilleri ve sınıfları bağlayın
+    const completedProfilesWithClasses = completedProfiles.map(profile => {
+      return {
+        ...profile,
+        classrooms: classrooms.filter(classroom => 
+          studentClassRelations.some(rel => rel.user.username === profile.username.username && rel.classroom.id === classroom.id)
+        )
+      };
+    });
+  
+    // Sonuçları konsola yazdır
+    console.log('Completed Profiles with Classes:', completedProfilesWithClasses);
+    console.log('Incompleted Profiles with Classes:', incompletedProfilesWithClasses);
+  
+    return {
+      completedProfiles: completedProfilesWithClasses,
+      incompletedProfiles: incompletedProfilesWithClasses,
+      message: incompletedProfilesWithClasses.length > 0 
+        ? 'There are students with incomplete profiles.'
+        : 'All student profiles are complete.' 
+    };
+  }
 
-  //   if (!userId) {
-  //     throw new InternalServerErrorException('Invalid token or user ID not found.');
-  //   }
+  async findAllTeachers(): Promise<{ completedProfiles: TProfileEntity[], incompleteProfiles: ProfileEntity[], message: string }> {
+    // Tüm profilleri öğretmenlerle birlikte getir
+    const tprofiles = await this.tProfileRepository
+      .createQueryBuilder('tprofile')
+      .leftJoinAndSelect('tprofile.username', 'user') // İlişki adı doğru olduğundan emin olun
+      .select(['tprofile.id', 'user.username', 'tprofile.name', 'tprofile.surname', 'tprofile.dateOfBirth', 'tprofile.gender', 'tprofile.place' ])
+      .getMany();
+  
+    console.log('All Profiles That Are Teachers:', tprofiles);
+  
+    // Kullanıcıları öğretmen rollerine göre al
+    const users = await this.userRepository.find({
+      where: { roles: Role.Teacher },
+    });
+    console.log('Users:', users);
+  
+    // Eksik profiller için bir dizi oluştur
+    const incompleteProfiles: ProfileEntity[] = [];
+  
+    // Kullanıcılar arasında eksik profilleri belirle
+    users.forEach(user => {
+      const profile = tprofiles.find(profile => profile.username.username === user.username);
+  
+      if (!profile || !profile.name || !profile.surname || !profile.dateOfBirth || !profile.gender) {
+        incompleteProfiles.push({
+          id: profile?.id ?? null,
+          name: profile?.name ?? '',
+          surname: profile?.surname ?? '',
+          dateOfBirth: profile?.dateOfBirth ? new Date(profile.dateOfBirth) : new Date(), // Varsayılan tarih
+          gender: profile?.gender ?? '',
+          username: user, // Kullanıcı nesnesini doğrudan kullanın
+          residence: profile?.place ?? '', // Eksik olan diğer özellikler
+          phone: profile?.phone ?? '', // Varsayılan değerler ekleyin
+          email: profile?.email ?? '',
+        } as ProfileEntity); // ProfileEntity türüne dönüştür
+      }
+    });
+  
+    // Tamamlanmış profilleri oluştur
+    const completedProfiles = tprofiles.filter(profile =>
+      profile.name && profile.surname && profile.dateOfBirth && profile.gender
+    );
+  
+    console.log('Completed Profiles:', completedProfiles); // Debug log
+    console.log('Incomplete Profiles:', incompleteProfiles); // Debug log
+  
+    // Sonuçları döndür
+    return {
+      completedProfiles,
+      incompleteProfiles,
+      message: incompleteProfiles.length > 0 
+        ? 'There are users with incomplete profiles.'
+        : 'All profiles are complete.' 
+    };
+  }
 
-  //   // Kullanıcının oluşturduğu sınıfları bulun
-  //   const classrooms = await this.classroomRepository
-  //     .createQueryBuilder('classroom')
-  //     .where('classroom.creatorId = :userId', { userId })
-  //     .getMany();
+  async callTeachers(accessToken: string) {
+    // Decode the token to get the user ID
+    const decodedToken = this.jwtService.decode(accessToken);
+    const userId = decodedToken.sub;
+  console.log('User ID:', userId);
+  
+    // Find connections where either requesterId or requesteeId is the student user
+    const connections = await this.connectionRepository
+      .createQueryBuilder('connection')
+      .leftJoinAndSelect('connection.requester', 'requester')
+      .leftJoinAndSelect('connection.requestee', 'requestee')
+      .where('requester.id = :userId OR requestee.id = :userId', { userId })
+      .andWhere('(requester.roles = :studentRole OR requestee.roles = :studentRole)', { studentRole: 'student' })
+      .getMany();
 
-  //   if (classrooms.length === 0) {
-  //     throw new InternalServerErrorException('No classrooms found for this user.');
-  //   }
+      console.log('Connections:', connections);      
+  
+    // Extract teacher usernames from the connections
+    const teacherUsernames = connections.flatMap(connection => {
+      const teacherUsernames = [];
+      if (connection.requester.roles === 'teacher') {
+        teacherUsernames.push(connection.requester.username);
+      }
+      if (connection.requestee.roles === 'teacher') {
+        teacherUsernames.push(connection.requestee.username);
+      }
+      return teacherUsernames;
+    });
+  
+    return teacherUsernames;
+  }
+  
+  
 
-  //   console.log('Classrooms:', classrooms);
-
-  //   // Get student-class relations
-  //   const studentClassRelations = await this.userCrRepository
-  //     .createQueryBuilder('user_cr')
-  //     .leftJoinAndSelect('user_cr.user', 'user')
-  //     .where('user_cr.classroomId IN (:...classroomIds)', { classroomIds: classrooms.map(c => c.id) })
-  //     .andWhere('user.roles = :role', { role: Role.Student })
-  //     .getMany();
-
-  //   console.log('studentClassRelations:', studentClassRelations);
-
-  //   // Extract student IDs from studentClassRelations
-  //   const studentUsernames: string[] = studentClassRelations.map(relation => {
-  //     // Eğer relation.user.username bir UsersEntity ise, ona erişim sağlayalım
-  //     if (relation.user.username && typeof relation.user.username === 'object') {
-  //       return relation.user.username || ''; // UsersEntity içindeki username alanına erişim
-  //     }
-  //     return ''; // Eğer kullanıcı yoksa boş döndür
-  //   }).filter(username => username !== '');
-
-  //   console.log('studentUsernames:', studentUsernames);
-    
-  //   const profiles = await this.profileRepository
-  //     .createQueryBuilder('profile')
-  //     .leftJoinAndSelect('profile.username', 'user') // İlişki adı doğru olduğundan emin olun
-  //     .where('user.roles = :role', { role: Role.Student })
-  //     .select(['profile.id', 'profile.name', 'profile.surname', 'profile.dateOfBirth', 'profile.gender', 'user.username'])
-  //     .getMany();
-
-  //   console.log('All Profiles That Are Students:', profiles);
-
-  //     const completedProfiles = profiles.filter(profile =>
-  //     profile.name && profile.surname && profile.dateOfBirth && profile.gender
-  //   );
-
-  //   console.log('Completed Profiles:', completedProfiles); // Debug log
-
-  //   const incompletedProfiles = studentClassRelations.filter(relation => {
-  //     const username = relation.user.username; // Username direkt burada string olsa bu şekilde kullanacağız
-  //     return username && !profiles.some(profile => profile.username.username === username);
-  //   });
-
-
-  // // Sonuçları konsola yazdır
-  // console.log('incompletedProfiles:', incompletedProfiles);
-
-  //   return {
-  //     completedProfiles,
-  //     incompletedProfiles,
-  //     message: incompletedProfiles.length > 0 
-  //       ? 'There are students with incomplete profiles.'
-  //       : 'All student profiles are complete.' 
-  //   };
-  // }
-
-  // async findAllTeachers(): Promise<{ completedProfiles: ProfileEntity[], incompleteProfiles: ProfileEntity[], message: string }> {
-  //   // Tüm profilleri öğretmenlerle birlikte getir
-  //   const profiles = await this.profileRepository
-  //     .createQueryBuilder('profile')
-  //     .leftJoinAndSelect('profile.username', 'user') // İlişki adı doğru olduğundan emin olun
-  //     .where('user.roles = :role', { role: Role.Teacher })
-  //     .select(['profile.id', 'profile.name', 'profile.surname', 'profile.dateOfBirth', 'profile.gender', 'user.username'])
-  //     .getMany();
-
-  //   console.log('All Profiles That Are Teachers:', profiles);
-
-  //   // Kullanıcıları öğretmen rollerine göre al
-  //   const users = await this.userRepository.find({
-  //     where: { roles: Role.Teacher },
-  //   });
-  //   console.log('Users:', users);
-
-  //   // Eksik profiller için bir dizi oluştur
-  //   const incompleteProfiles: ProfileEntity[] = [];
-
-  //   // Kullanıcılar arasında eksik profilleri belirle
-  //   users.forEach(user => {
-  //     const profile = profiles.find(profile => profile.username.username === user.username);
-
-  //     if (!profile || !profile.name || !profile.surname || !profile.dateOfBirth || !profile.gender) {
-  //       incompleteProfiles.push({
-  //         id: profile?.id ?? null,
-  //         name: profile?.name ?? '',
-  //         surname: profile?.surname ?? '',
-  //         dateOfBirth: profile?.dateOfBirth ? new Date(profile.dateOfBirth) : new Date(), // Varsayılan tarih
-  //         gender: profile?.gender ?? '',
-  //         username: user, // Kullanıcı nesnesini doğrudan kullanın
-  //         residence: profile?.residence ?? '', // Eksik olan diğer özellikler
-  //         phone: profile?.phone ?? '', // Varsayılan değerler ekleyin
-  //         email: profile?.email ?? '',
-  //         roles: profile?.roles ?? ''
-  //       } as ProfileEntity); // ProfileEntity türüne dönüştür
-  //     }
-  //   });
-
-  //   // Tamamlanmış profilleri oluştur
-  //   const completedProfiles = profiles.filter(profile =>
-  //     profile.name && profile.surname && profile.dateOfBirth && profile.gender
-  //   );
-
-  //   console.log('Completed Profiles:', completedProfiles); // Debug log
-  //   console.log('Incomplete Profiles:', incompleteProfiles); // Debug log
-
-  //   // Sonuçları döndür
-  //   return {
-  //     completedProfiles,
-  //     incompleteProfiles,
-  //     message: incompleteProfiles.length > 0 
-  //       ? 'There are users with incomplete profiles.'
-  //       : 'All profiles are complete.' 
-  //   };
-  // }
- 
   async createProfile(data: CreateProfileDto & CreateTProfileDto, accessToken: string) {
     const decodedToken = this.jwtService.decode(accessToken);
     const user = await this.userRepository.findOneBy({ id: decodedToken.sub });
@@ -227,7 +285,6 @@ export class ProfileService {
       tProfile.area = data.area;
       tProfile.explanation = data.explanation;
       tProfile.place = data.place;
-      tProfile.price = data.price;
     
         console.log('TProfile:', tProfile);
     
@@ -343,6 +400,136 @@ export class ProfileService {
       statusCode: 200,
       message: updateMessages.length > 0 ? updateMessages.join(' ') : 'Your profile has been updated!',
     };
+  }
+
+  async getProfileById(profileId: number, requester: UsersEntity): Promise<ProfileEntity> {
+    const profile = await this.profileRepository.findOne({
+        where: { id: profileId },
+    });
+
+    if (!profile) {
+        throw new Error('Profile not found');
+    }
+
+    // Check visibility
+    switch (profile.phoneVisibility) {
+        case PhoneVisibility.Everyone:
+            return profile;
+        case PhoneVisibility.AllStudents:
+            // Check if requester is a student
+            if (requester.roles === 'student') {
+                return profile;
+            }
+            break;
+        case PhoneVisibility.AllTeachers:
+            // Check if requester is a teacher
+            if (requester.roles === 'teacher') {
+                return profile;
+            }
+            break;
+        case PhoneVisibility.MyTeachers:
+            // Check if requester is a teacher and is listed as a teacher for this profile's owner
+            if (requester.roles === 'teacher' && await this.isTeacherOf(requester, profile.ownerId)) {
+                return profile;
+            }
+            break;
+        case PhoneVisibility.MyStudents:
+            // Check if requester is a student and is listed as a student for this profile's owner
+            if (requester.roles === 'student' && await this.isStudentOf(requester, profile.ownerId)) {
+                return profile;
+            }
+            break;
+        case PhoneVisibility.ApprovedOnly:
+            // Check if requester is approved
+            if (await this.isApproved(requester, profile.ownerId)) {
+                return profile;
+            }
+            break;
+        default:
+            throw new Error('Invalid phone visibility setting');
+    }
+
+    throw new Error('Access denied');
+  }
+
+  async getProfileByIdForT(profileId: number, requester: UsersEntity): Promise<TProfileEntity> {
+    const profile = await this.tProfileRepository.findOne({
+        where: { id: profileId },
+    });
+
+    if (!profile) {
+        throw new Error('Profile not found');
+    }
+
+    // Check visibility
+    switch (profile.phoneVisibility) {
+        case PhoneVisibility.Everyone:
+            return profile;
+        case PhoneVisibility.AllStudents:
+            // Check if requester is a student
+            if (requester.roles === 'student') {
+                return profile;
+            }
+            break;
+        case PhoneVisibility.AllTeachers:
+            // Check if requester is a teacher
+            if (requester.roles === 'teacher') {
+                return profile;
+            }
+            break;
+        case PhoneVisibility.MyTeachers:
+            // Check if requester is a teacher and is listed as a teacher for this profile's owner
+            if (requester.roles === 'teacher' && await this.isTeacherOf(requester, profile.ownerId)) {
+                return profile;
+            }
+            break;
+        case PhoneVisibility.MyStudents:
+            // Check if requester is a student and is listed as a student for this profile's owner
+            if (requester.roles === 'student' && await this.isStudentOf(requester, profile.ownerId)) {
+                return profile;
+            }
+            break;
+        case PhoneVisibility.ApprovedOnly:
+            // Check if requester is approved
+            if (await this.isApproved(requester, profile.ownerId)) {
+                return profile;
+            }
+            break;
+        default:
+            throw new Error('Invalid phone visibility setting');
+    }
+
+    throw new Error('Access denied');
+  }
+
+  private async isTeacherOf(requester: UsersEntity, ownerId: number): Promise<boolean> {
+      // Implement logic to check if requester is a teacher of the owner
+      return true;
+  }
+
+  private async isStudentOf(requester: UsersEntity, ownerId: number): Promise<boolean> {
+      // Implement logic to check if requester is a student of the owner
+      return true;
+  }
+
+  private async isApproved(requester: UsersEntity, ownerId: number): Promise<boolean> {
+      // Implement logic to check if requester is approved by the owner
+      return true;
+  }
+
+  async sharePhone(profileId: number, userId: number): Promise<void> {
+    // Logic to share phone number with a specific user
+    await this.updateShareStatus(profileId, userId, true);
+  }
+
+  async unsharePhone(profileId: number, userId: number): Promise<void> {
+    // Logic to unshare phone number with a specific user
+    await this.updateShareStatus(profileId, userId, false);
+  }
+
+  private async updateShareStatus(profileId: number, userId: number, share: boolean): Promise<void> {
+    // Implement logic to update sharing status in the database
+    // Add logging here if needed
   }
   
 }

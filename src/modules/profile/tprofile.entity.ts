@@ -1,6 +1,7 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { UsersEntity } from '../user/user.entity';
 import { Place } from '../enum/place.enum';
+import { PhoneVisibility } from '../enum/visibility.enum';
 
 @Entity('tprofile')
 export class TProfileEntity {
@@ -26,6 +27,14 @@ export class TProfileEntity {
     @ManyToOne(() => UsersEntity, user => user.phone)
     phone: UsersEntity;
 
+    @Column({
+        type: 'enum',
+        enum: PhoneVisibility,
+        nullable: true,
+        default: null,
+    })
+    phoneVisibility: PhoneVisibility | null;
+
     @ManyToOne(() => UsersEntity, user => user.email)
     email: UsersEntity;
     @Column({ nullable: true })
@@ -44,10 +53,10 @@ export class TProfileEntity {
     })
     place: Place;
 
-    @Column({ nullable: true })
-    price: string;
-
     @Column({ nullable: true, default: false })
     activationFlag: boolean;
+
+    ownerId: any;
+    classroom: any;
 
 }

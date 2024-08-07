@@ -21,8 +21,10 @@ export class ClassroomController {
     @Permissions('view_crs')
     @Roles(Role.Teacher)
     @Get('asTeachs')
-    async getClassroomsForTeachs(@Req() req:any) {  
-        return this.crService.getClassroomsForTeachs(req.user.sub);
+    async getClassroomsForTeachs(@Req() req) {
+        console.log('Classrooms Controller Called');
+        const accessToken = req.headers.authorization.split(' ')[1];
+        return this.crService.getClassroomsForTeachs(accessToken);
     }
 
     @UseGuards(AuthGuard, RoleGuard, PermissionGuard)

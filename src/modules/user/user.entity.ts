@@ -1,7 +1,10 @@
-import { BaseEntity, Column, DeleteDateColumn, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { roles } from './../enum/role.enum';
+import { BaseEntity, Column, DeleteDateColumn, Entity, JoinTable, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { CategoryEntity } from '../category/category.entity';
 import { Role } from '../enum/role.enum';
 import { ClassroomEntity } from '../classroom/classroom.entity';
+import { PhoneVisibility } from '../enum/visibility.enum';
+import { TProfileEntity } from '../profile/tprofile.entity';
 
 @Entity('users')
 export class UsersEntity extends BaseEntity {

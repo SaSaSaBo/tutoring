@@ -18,6 +18,7 @@ import { CategoryService } from '../category/category.service';
 import { TransactionService } from '../transaction/transaction.service';
 import { TransactionEntity } from '../transaction/transaction.entity';
 import { ProfileEntity } from '../profile/profile.entity';
+import { ConnectionEntity } from '../connection/connection.entity';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { ProfileEntity } from '../profile/profile.entity';
       InfoEntity,
       TransactionEntity,
       ProfileEntity,
+      ConnectionEntity,
     ])
   ],
   controllers: [RequestController],

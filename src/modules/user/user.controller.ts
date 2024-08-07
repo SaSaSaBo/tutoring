@@ -33,25 +33,37 @@ export class UserController {
         return this.profileService.findAll();
       }
 
-      // @Get('teachers')
-      // @UseGuards(AuthGuard, RoleGuard, PermissionGuard)
-      // @Permissions('view_students')
-      // @Roles(Role.Teacher)
-      // async findAllStudents (
-      //   @Req() req: Request
-      // ) {
-      //   const authHeader = req.headers['authorization'];
-      //   const accessToken = authHeader?.replace('Bearer ', '');
-      //   return this.profileService.findAllStudents(accessToken);
-      // }
+      @Get('teachers')
+      @UseGuards(AuthGuard, RoleGuard, PermissionGuard)
+      @Permissions('view_students')
+      @Roles(Role.Teacher)
+      async findAllStudents (
+        @Req() req: Request
+      ) {
+        const authHeader = req.headers['authorization'];
+        const accessToken = authHeader?.replace('Bearer ', '');
+        return this.profileService.findAllStudents(accessToken);
+      }
 
-      // @Get('students')
-      // @UseGuards(AuthGuard, RoleGuard, PermissionGuard)
-      // @Permissions('view_teachs')
-      // @Roles(Role.Student)
-      // async findAllSubTeachers () {
-      //   return this.profileService.findAllTeachers();
-      // }
+      @Get('students')
+      @UseGuards(AuthGuard, RoleGuard, PermissionGuard)
+      @Permissions('view_teachs')
+      @Roles(Role.Student)
+      async findAllTeachers () {
+        return this.profileService.findAllTeachers();
+      }
+
+      @Get('students-teach')
+      @UseGuards(AuthGuard, RoleGuard, PermissionGuard)
+      @Permissions('view_teachs')
+      @Roles(Role.Student)
+      async callTeachers (
+        @Req() req
+      ) {
+        const authHeader = req.headers['authorization'];
+        const accessToken = authHeader?.replace('Bearer ', '');
+        return this.profileService.callTeachers(accessToken);
+      }
 
       @Post('join')
       @UseGuards(AuthGuard, RoleGuard, PermissionGuard)

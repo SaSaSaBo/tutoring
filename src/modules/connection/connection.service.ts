@@ -29,13 +29,9 @@ export class ConnectionService {
     });
 
     console.log('activeBlocks: ', activeBlocks);
-    
-    if (!activeBlocks) {
-        throw new ForbiddenException('You cannot send a connection request because one of the users is blocked.');
-    }    
 
-    if(activeBlocks.length != null){
-      throw new ForbiddenException('You cannot send a connection request because one of the users is blocked.');
+    if (activeBlocks.length > 0) {
+        throw new ForbiddenException('You cannot send a connection request because one of the users is blocked.');
     }
 
     const existingConnection = await this.connectionRepository.findOne({
@@ -59,7 +55,8 @@ export class ConnectionService {
     }
 
     return this.connectionRepository.save(connection);
-}  
+}
+
 
   async acceptConnection(requesteeId: UsersEntity, requesterId: UsersEntity, acceptData: AcceptConnectionDto): Promise<ConnectionEntity> {        
     const connection = await this.connectionRepository.findOne({
