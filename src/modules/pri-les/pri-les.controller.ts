@@ -32,4 +32,13 @@ export class PriLesController {
         return this.priLesService.acceptPriLes(data, accessToken);
     }
 
+    @Post('decline')
+    async declinePriLes(@Body() data: AcceptPriLesDto, @Req() req): Promise<{ message: string }> {
+        const accessToken = req.headers.authorization?.split(' ')[1]; // Token'ı alın (örneğin: "Bearer <token>")
+        if (!accessToken) {
+            throw new BadRequestException('Access token is required');
+        }
+        return this.priLesService.declinePriLes(data, accessToken);
+    }
+
 }

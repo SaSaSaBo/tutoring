@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { SendPriLesDto } from '../dto/pri-les/send.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PriLesEntity } from './pri-les.entity';
@@ -81,6 +81,41 @@ export class PriLesService {
             throw error;
         }
     }
+
+    async declinePriLes(data: AcceptPriLesDto, accessToken: string): Promise<{ message: string }> {
+        // JWT token'ı decode et
+        const decodedToken = this.jwtService.decode(accessToken) as { sub: number };
+        const accepterId = decodedToken.sub; // Kabul eden kullanıcının ID'si
+    
+        console.log('Accepter ID from token:', accepterId);
+        
+        // PriLesEntity'yi bul
+        const priLes = await this.priLesRepository.findOne({ 
+            where: { id: data.pri_les_id },
+            relations: ['accepter'] // İlişkileri dahil ederek veriyi çekin
+        });
+    
+        if (!priLes) {
+            throw new NotFoundException('Pri-les request not found');
+        }
+    
+        console.log('PriLes:', priLes);
+    
+        // Kabul eden kullanıcıyı kontrol et
+        if (priLes.accepter?.id !== accepterId) {
+            console.log('Accepter ID in PriLes:', priLes.accepter?.id);
+            throw new BadRequestException('This user is not the accepter of this Pri-les request');
+        }
+    
+        // PriLesEntity'yi güncelle
+        priLes.accepter = null; // Kabul eden kullanıcıyı kaldır
+    
+        await this.priLesRepository.save(priLes); // Güncellenmiş veriyi kaydet
+    
+        return { message: 'Pri-les request declined successfully.' };
+    }
+    
+    
     
 
 }
