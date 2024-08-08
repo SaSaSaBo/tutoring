@@ -19,7 +19,7 @@ export class CategoryController {
 
     @UseGuards(AuthGuard, RoleGuard, PermissionGuard)
     @Permissions('view_cats')
-    @Roles(Role.Manager, Role.Teacher)
+    @Roles(Role.Manager, Role.Teacher, Role.Student)
     @Get()
     async getCategories() {
         return this.categoryService.getCategories();

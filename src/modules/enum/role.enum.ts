@@ -35,6 +35,7 @@ export const roles = {
     student: [
         'view_clrs',
         'view_teachs',
+        'view_cats',
         'update_own_profile',
         'send_connection_request',
         'accept_connection_request',
