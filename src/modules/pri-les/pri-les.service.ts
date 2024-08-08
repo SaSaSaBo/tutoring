@@ -1,8 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { SendPriLesDto } from '../dto/pri-les/send.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PriLesEntity } from './pri-les.entity';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { UsersEntity } from '../user/user.entity';
 import { AcceptPriLesDto } from '../dto/pri-les/accept.dto';
@@ -68,6 +68,15 @@ export class PriLesService {
     
             console.log('PriLes:', priLes);
     
+            // Accepter kullanıcısının daha önce başka bir isteği kabul edip etmediğini kontrol et
+            const existingAcceptance = await this.priLesRepository.findOne({
+                where: { accepter: { id: accepterId }, id: Not(data.pri_les_id) }
+            });
+    
+            if (existingAcceptance) {
+                throw new ConflictException('Accepter has already accepted another PriLes request');
+            }
+    
             // PriLesEntity'yi güncelle
             priLes.accepter = await this.usersRepository.findOne({ where: { id: accepterId } }); // Kabul eden kullanıcıyı ayarla
     
@@ -81,7 +90,7 @@ export class PriLesService {
             throw error;
         }
     }
-
+    
     async declinePriLes(data: AcceptPriLesDto, accessToken: string): Promise<{ message: string }> {
         // JWT token'ı decode et
         const decodedToken = this.jwtService.decode(accessToken) as { sub: number };
