@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { UpdateCRDto } from '../dto/classroom/update.dto';
 import { DeleteCRDto } from '../dto/classroom/delete.dto';
 import { CreateCRDto } from '../dto/classroom/create.dto';
@@ -9,7 +9,8 @@ import { InfoEntity } from '../info/info.entity';
 import { InfoService } from '../info/info.service';
 import { UsersEntity } from '../user/user.entity';
 import { JwtService } from '@nestjs/jwt';
-import { UserCrEntity } from '../entity/user.cr.entity';
+import { UserService } from '../user/user.service';
+import { PriLesEntity } from '../pri-les/pri-les.entity';
 
 @Injectable()
 export class ClassroomService {
@@ -21,9 +22,11 @@ export class ClassroomService {
         @InjectRepository(UsersEntity) 
         private readonly userRepository: Repository<UsersEntity>,
 
-        @InjectRepository(UserCrEntity)
-        private readonly userCrRepository: Repository<UserCrEntity>,
+        @InjectRepository(PriLesEntity)
+        private readonly priLesRepository: Repository<PriLesEntity>,
 
+
+        private userService: UserService,
         private infoService: InfoService,
         private jwtService: JwtService
     ) {}
@@ -57,72 +60,67 @@ export class ClassroomService {
             ])
             .getMany();
     }
+
+
+
+
+
+
+
+
+
+
+
     
-    async createClassroom(createData: CreateCRDto, accessToken: string): Promise<ClassroomEntity> {
-        try {
-            console.log('AccessToken: ', accessToken);
+
+    async createClassroom(createData: CreateCRDto, accessToken: string) {
+        // Decode the access token to get the user ID
+        const decodedToken = this.jwtService.decode(accessToken) as any;
+        if (!decodedToken || !decodedToken.sub) {
+            throw new UnauthorizedException('Invalid access token');
+        }
+        
+        const userId = decodedToken.sub;
     
-            // Decode accessToken to get user information
-            const decodedToken = this.jwtService.decode(accessToken);
-            console.log('DecodedToken: ', decodedToken);
+        // Fetch PriLes entries where accepter.id matches the user ID
+        const priLes = await this.priLesRepository.find({
+            where: { accepter: { id: userId } },
+        });
     
-            if (!decodedToken || typeof decodedToken !== 'object') {
-                throw new UnauthorizedException('Invalid access token.');
-            }
+        console.log('PriLes Data:', priLes);
     
-            // Fetch user from database with categories loaded
-            console.log('Fetching user from database...');
-            const user = await this.userRepository.findOne({
-                where: { username: decodedToken.username },
-                relations: ['categories'], // Load categories relationship
-            });
+        // return priLes;
     
-            if (!user) {
-                console.error('User not found.');
-                throw new NotFoundException('User not found.');
-            }
-    
-            console.log('User found: ', user);
-    
-            // Check if user has any categories that allow classroom creation
-            const canCreateClassroom = user.categories.length > 0;
-            console.log('Can create classroom: ', canCreateClassroom);
-    
-            if (!canCreateClassroom) {
-                throw new UnauthorizedException('User is not authorized to create classrooms.');
-            }
-    
-            // Validate that categoryId is provided
-            if (!createData.categoryId) {
-                throw new BadRequestException('categoryId is required.');
-            }
-    
-            // Check if the user is associated with the given categoryId
-            console.log('Checking user categories for categoryId: ', createData.categoryId);
-            const category = user.categories.find(cat => cat.id === createData.categoryId);
-            console.log('Category found: ', category);
-    
-            if (!category) {
-                console.error('User is not authorized for the specified category.');
-                throw new UnauthorizedException('User is not authorized to create classrooms in the specified category.');
-            }
-    
-            // Create new classroom entity
+        if (priLes) {
+            // Create a new classroom entity
             const classroom = new ClassroomEntity();
             classroom.cr_name = createData.cr_name;
-            classroom.capability = createData.capability;
             classroom.price = createData.price;
-            classroom.creator = user; // Correctly set the creator relation
-            classroom.category = category; // Correctly set the category relation
+            classroom.creator = userId; // Correctly set the creator relation
     
-            // Save classroom to database
-            console.log('Saving classroom to database...');
+            // Save the classroom to the database
             return await this.classroomRepository.save(classroom);
-        } catch (error) {
-            console.error('Error creating classroom: ', error.message);
-            throw new InternalServerErrorException('Failed to create classroom.', error);
+    
+        } else {
+            throw new ForbiddenException('You cannot create a classroom.');
         }
     }
+    
+    
+    
+    
+    
+  
+    
+
+
+
+
+
+
+
+    
+    
 
     async updateClassroom(id: number, updateData: UpdateCRDto, accessToken: string) {
         try {

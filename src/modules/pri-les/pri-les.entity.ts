@@ -20,6 +20,6 @@ export class PriLesEntity {
     @JoinColumn({
       name: 'accepter',
     })
-    accepter: UsersEntity | null; // İsteği kabul eden kullanıcı (null olabilir)
+    accepter: UsersEntity | null; 
 
 }

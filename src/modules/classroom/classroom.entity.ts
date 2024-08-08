@@ -12,15 +12,15 @@ export class ClassroomEntity {
     @Column()
     cr_name: string;
 
-    @Column()
+    @Column({nullable: true})
     capability: number;
 
     @ManyToOne(() => UsersEntity, user => user.classrooms, { eager: false })
     @Exclude()
     creator: UsersEntity;
 
-    @ManyToOne(() => CategoryEntity, category => category.classrooms, {onDelete: 'CASCADE'})
-    category: CategoryEntity; // Change to singular
+    @ManyToOne(() => CategoryEntity, category => category.classrooms, {onDelete: 'CASCADE', nullable: true})
+    category: CategoryEntity | null; // Change to singular
 
     @CreateDateColumn()
     created_at: Date;    

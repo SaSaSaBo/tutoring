@@ -6,11 +6,13 @@ export class CreateCRDto {
     @IsString()
     cr_name: string;
 
+    @IsOptional()
     @IsNumber()
-    capability: number;
+    capability?: number;
 
+    @IsOptional()
     @IsNumber()
-    categoryId: number; // Change to number type
+    categoryId?: number; // Change to number type
 
     @IsString()
     price: string;
