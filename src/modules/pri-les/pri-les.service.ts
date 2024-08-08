@@ -114,8 +114,5 @@ export class PriLesService {
     
         return { message: 'Pri-les request declined successfully.' };
     }
-    
-    
-    
 
 }

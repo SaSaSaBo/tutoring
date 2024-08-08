@@ -23,6 +23,8 @@ import { RequestEntity } from '../request/request.entity';
 import { BlockService } from '../block/block.service';
 import { BlockEntity } from '../block/block.entity';
 import { ProfileEntity } from '../profile/profile.entity';
+import { PriLesEntity } from '../pri-les/pri-les.entity';
+import { NotificationService } from '../service/notification.service';
 
 @Module({
   imports: [
@@ -39,6 +41,7 @@ import { ProfileEntity } from '../profile/profile.entity';
       RequestEntity,
       BlockEntity,
       ProfileEntity,
+      PriLesEntity,
     ])
   ],
   controllers: [MessageController],
@@ -53,6 +56,7 @@ import { ProfileEntity } from '../profile/profile.entity';
     InOutService,
     ConnectionService,
     BlockService,
+    NotificationService,  
   ]
 })
 export class MessagesModule {}

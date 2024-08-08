@@ -24,6 +24,8 @@ import { ConnectionService } from '../connection/connection.service';
 import { RequestEntity } from '../request/request.entity';
 import { BlockEntity } from '../block/block.entity';
 import { ProfileEntity } from '../profile/profile.entity';
+import { PriLesEntity } from '../pri-les/pri-les.entity';
+import { NotificationService } from '../service/notification.service';
 @Module({
   imports: [
     TypeOrmModule.forFeature([ 
@@ -39,6 +41,7 @@ import { ProfileEntity } from '../profile/profile.entity';
       RequestEntity,
       BlockEntity,
       ProfileEntity,
+      PriLesEntity,
     ]),
   ],
   controllers: [CategoryController],
@@ -54,6 +57,7 @@ import { ProfileEntity } from '../profile/profile.entity';
     AuthenticationService,
     MessageService,
     ConnectionService,
+    NotificationService,
   ]
 })
 export class CategoryModule {}

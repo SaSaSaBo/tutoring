@@ -30,6 +30,8 @@ import { ActivationService } from '../activation/activation.service';
 import { EmailService } from '../service/email.service';
 import { SmsService } from '../service/sms.service';
 import { TProfileEntity } from '../profile/tprofile.entity';
+import { PriLesEntity } from '../pri-les/pri-les.entity';
+import { NotificationService } from '../service/notification.service';
 
 @Module({
   imports: [
@@ -48,6 +50,7 @@ import { TProfileEntity } from '../profile/tprofile.entity';
       ProfileEntity,  
       ActivationEntity,
       TProfileEntity,
+      PriLesEntity,
     ])
   ],
   controllers: [UserController],
@@ -67,6 +70,7 @@ import { TProfileEntity } from '../profile/tprofile.entity';
     ActivationService,
     EmailService,
     SmsService,
+    NotificationService,
   ],
 })
 export class UserModule {}

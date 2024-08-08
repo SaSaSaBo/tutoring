@@ -39,6 +39,8 @@ import { ProfileModule } from './modules/profile/profile.module';
 import { ProfileEntity } from './modules/profile/profile.entity';
 import { ActivationModule } from './modules/activation/activation.module';
 import { PriLesModule } from './modules/pri-les/pri-les.module';
+import { PriLesEntity } from './modules/pri-les/pri-les.entity';
+import { NotificationService } from './modules/service/notification.service';
 
 @Module({
   imports: [
@@ -59,6 +61,7 @@ import { PriLesModule } from './modules/pri-les/pri-les.module';
       RequestEntity,
       BlockEntity,
       ProfileEntity,
+      PriLesEntity,
     ]),
     CategoryModule, 
     TransactionModule, 
@@ -87,6 +90,7 @@ import { PriLesModule } from './modules/pri-les/pri-les.module';
     ClassroomService,
     MessageService,
     ConnectionService,
+    NotificationService,
   ],
 })
 

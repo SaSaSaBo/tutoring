@@ -37,4 +37,5 @@ export class ClassroomEntity {
     deletedAt: Date;
 
     classroomId: any;
+    students: any
 }
