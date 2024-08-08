@@ -79,32 +79,62 @@ export class ClassroomService {
         if (!decodedToken || !decodedToken.sub) {
             throw new UnauthorizedException('Invalid access token');
         }
-        
+    
         const userId = decodedToken.sub;
     
-        // Fetch PriLes entries where accepter.id matches the user ID
-        const priLes = await this.priLesRepository.find({
-            where: { accepter: { id: userId } },
+        console.log('User ID:', userId);
+    
+        // Fetch the user from the database
+        const user = await this.userRepository.findOne({
+            where: { id: userId },
+            relations: ['categories'], // Ensure you load the related categories
         });
     
-        console.log('PriLes Data:', priLes);
+        if (!user) {
+            throw new UnauthorizedException('User not found');
+        }
     
-        // return priLes;
+        if (createData.capability && createData.categoryId > 0) {
+            const category = user.categories.find(cat => cat.id === createData.categoryId);
     
-        if (priLes) {
-            // Create a new classroom entity
+            console.log('Category found: ', category);
+    
+            if (!category) {
+                console.error('User is not authorized for the specified category.');
+                throw new UnauthorizedException('User is not authorized to create classrooms in the specified category.');
+            }
+    
             const classroom = new ClassroomEntity();
             classroom.cr_name = createData.cr_name;
             classroom.price = createData.price;
-            classroom.creator = userId; // Correctly set the creator relation
-    
-            // Save the classroom to the database
+            classroom.creator = user;
+            classroom.capability = createData.capability;
+            classroom.category = category;
             return await this.classroomRepository.save(classroom);
-    
         } else {
-            throw new ForbiddenException('You cannot create a classroom.');
+            // Fetch PriLes entries where accepter.id matches the user ID
+            const priLes = await this.priLesRepository.find({
+                where: { accepter: { id: userId } },
+            });
+    
+            console.log('PriLes Data:', priLes);
+    
+            if (priLes.length > 0) {
+                // Create a new classroom entity
+                const classroom = new ClassroomEntity();
+                classroom.cr_name = createData.cr_name;
+                classroom.price = createData.price;
+                classroom.creator = user; // Correctly set the creator relation
+    
+                // Save the classroom to the database
+                return await this.classroomRepository.save(classroom);
+    
+            } else {
+                throw new ForbiddenException('You cannot create a classroom.');
+            }
         }
     }
+    
     
     
     
