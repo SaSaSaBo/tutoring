@@ -2,7 +2,7 @@ import { BadRequestException, ForbiddenException, Injectable, InternalServerErro
 import { CreateProfileDto, CreateTProfileDto } from '../dto/profile/create.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsersEntity } from '../user/user.entity';
-import { In, Repository } from 'typeorm';
+import { Between, In, Repository } from 'typeorm';
 import { ProfileEntity } from './profile.entity';
 import { InOutEntity } from '../in-out/in-out.entity';
 import { JwtService } from '@nestjs/jwt';
@@ -57,7 +57,47 @@ export class ProfileService {
     return { users, studentCount, teacherCount };
   }
   
+  async findAllDate(month?: number, year?: number): Promise<{ users: UsersEntity[], studentCount: number, teacherCount: number }> {
+    let dateCondition = {};
   
+    if (month && year) {
+      // Month and year are both provided
+      const startDate = new Date(year, month - 1, 1);
+      const endDate = new Date(year, month, 0, 23, 59, 59, 999); // Last day of the month
+      dateCondition = { created_at: Between(startDate, endDate) };
+    } else if (year) {
+      // Only year is provided
+      const startDate = new Date(year, 0, 1);
+      const endDate = new Date(year, 11, 31, 23, 59, 59, 999); // Last day of the year
+      dateCondition = { created_at: Between(startDate, endDate) };
+    } else if (month) {
+      // Only month is provided, assume current year
+      const currentYear = new Date().getFullYear();
+      const startDate = new Date(currentYear, month - 1, 1);
+      const endDate = new Date(currentYear, month, 0, 23, 59, 59, 999); // Last day of the month
+      dateCondition = { created_at: Between(startDate, endDate) };
+    }
+  
+    const users = await this.userRepository.find({
+      where: dateCondition,
+    });
+  
+    const studentCount = await this.userRepository.count({
+      where: {
+        roles: Role.Student,
+        ...dateCondition,
+      },
+    });
+  
+    const teacherCount = await this.userRepository.count({
+      where: {
+        roles: Role.Teacher,
+        ...dateCondition,
+      },
+    });
+  
+    return { users, studentCount, teacherCount };
+  }
 
   async findAllStudents(accessToken: string) {
     const decodedToken: any = this.jwtService.decode(accessToken);

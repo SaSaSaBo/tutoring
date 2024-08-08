@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpException, HttpStatus, Param, ParseIntPipe, Post, Put, Req, UseGuards, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpException, HttpStatus, Param, ParseIntPipe, Post, Put, Query, Req, UseGuards, ValidationPipe } from '@nestjs/common';
 import { UserUpdateDto } from '../dto/user/update.dto';
 import { UsersDeleteDto } from '../dto/user/delete.dto';
 import { UserService } from './user.service';
@@ -32,6 +32,18 @@ export class UserController {
       async findAll () {
         return this.profileService.findAll();
       }
+
+      @Get('allDate')
+      @UseGuards(AuthGuard, RoleGuard, PermissionGuard)
+      @Permissions('view_users')
+      @Roles(Role.Manager)
+      async findAllDate(
+        @Query('month') month?: number,
+        @Query('year') year?: number,
+      ) {
+        return this.profileService.findAllDate(month, year);
+      }
+      
 
       @Get('teachers')
       @UseGuards(AuthGuard, RoleGuard, PermissionGuard)

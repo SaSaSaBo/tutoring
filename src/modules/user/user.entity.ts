@@ -1,5 +1,5 @@
 import { roles } from './../enum/role.enum';
-import { BaseEntity, Column, DeleteDateColumn, Entity, JoinTable, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { BaseEntity, Column, CreateDateColumn, DeleteDateColumn, Entity, JoinTable, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { CategoryEntity } from '../category/category.entity';
 import { Role } from '../enum/role.enum';
 import { ClassroomEntity } from '../classroom/classroom.entity';
@@ -40,6 +40,9 @@ export class UsersEntity extends BaseEntity {
   })
   deletedAt: Date;
 
+  @CreateDateColumn()
+  created_at: Date;   
+
   @ManyToMany(() => CategoryEntity, category => category.users)
   @JoinTable({
     name: "cat_user",
@@ -51,7 +54,7 @@ export class UsersEntity extends BaseEntity {
         name: "categorysId",
         referencedColumnName: "id"
     }
-})
+  })
   categories: CategoryEntity[];
   
   classrooms: any;
