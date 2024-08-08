@@ -1,6 +1,5 @@
 import {
     BadRequestException,
-    ForbiddenException,
     HttpException,
     HttpStatus,
     Injectable,
@@ -9,7 +8,7 @@ import {
   } from '@nestjs/common';
 import { UsersEntity } from './user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CategoryEntity } from '../category/category.entity';
 import * as bcrypt from 'bcrypt';
 import { InfoService } from '../info/info.service';
@@ -25,7 +24,6 @@ import { AddStudentToClrDto } from '../dto/user/add.student.to.clr.dto';
 import { JwtService } from '@nestjs/jwt';
 import { UserCrEntity } from '../entity/user.cr.entity';
 import { RequestEntity } from '../request/request.entity';
-import { PhoneVisibility } from '../enum/visibility.enum';
 import { ConnectionEntity } from '../connection/connection.entity';
 
 @Injectable()
@@ -53,48 +51,11 @@ export class UserService {
     @InjectRepository(RequestEntity)
     private requestRepository: Repository<RequestEntity>,
 
-    @InjectRepository(ConnectionEntity)
-    private connectionRepository: Repository<ConnectionEntity>,
-
   
     private jwtService: JwtService,
     private infoService: InfoService,
     private passwordService:  PasswordService,
   ) {}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   // async findAll(userId: number): Promise<UsersEntity[]> {
   //   try {
@@ -169,35 +130,7 @@ export class UserService {
   //     throw error;
   //   }
   // }
-  
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+ 
   async findOne(username: string): Promise<UsersEntity | undefined> {
       return this.usersRepository.findOne({ where: { username } });
   }

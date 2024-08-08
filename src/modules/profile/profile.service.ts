@@ -1,8 +1,8 @@
-import { BadRequestException, ForbiddenException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateProfileDto, CreateTProfileDto } from '../dto/profile/create.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsersEntity } from '../user/user.entity';
-import { Between, In, Repository } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 import { ProfileEntity } from './profile.entity';
 import { InOutEntity } from '../in-out/in-out.entity';
 import { JwtService } from '@nestjs/jwt';
@@ -43,7 +43,6 @@ export class ProfileService {
         private connectionRepository: Repository<ConnectionEntity>,
 
 
-        private passwordService: PasswordService,
         private infoService: InfoService,
         private jwtService: JwtService,
   ) {}
@@ -282,8 +281,6 @@ export class ProfileService {
     return teacherUsernames;
   }
   
-  
-
   async createProfile(data: CreateProfileDto & CreateTProfileDto, accessToken: string) {
     const decodedToken = this.jwtService.decode(accessToken);
     const user = await this.userRepository.findOneBy({ id: decodedToken.sub });
