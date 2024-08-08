@@ -48,9 +48,16 @@ export class ProfileService {
         private jwtService: JwtService,
   ) {}
 
-  async findAll(): Promise<UsersEntity[]> {
-    return this.userRepository.find();
+  async findAll(): Promise<{ users: UsersEntity[], studentCount: number, teacherCount: number }> {
+    const users = await this.userRepository.find();
+  
+    const studentCount = await this.userRepository.count({ where: { roles: Role.Student } });
+    const teacherCount = await this.userRepository.count({ where: { roles: Role.Teacher } });
+  
+    return { users, studentCount, teacherCount };
   }
+  
+  
 
   async findAllStudents(accessToken: string) {
     const decodedToken: any = this.jwtService.decode(accessToken);
