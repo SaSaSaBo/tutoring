@@ -41,7 +41,10 @@ export class TProfileEntity {
     alma_mater: string;
 
     @Column({ nullable: true })
-    area: string;
+    city: string;
+
+    @Column({ nullable: true })
+    town: string;
 
     @Column({ type: 'text' })
     explanation: string;

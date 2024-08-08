@@ -98,6 +98,28 @@ export class ProfileService {
     return { users, studentCount, teacherCount };
   }
 
+  async findTeachAsM(city?: string, town?: string, name?: string, surname?: string): Promise<TProfileEntity[]> {
+    const query = this.tProfileRepository.createQueryBuilder('tprofile')
+  
+    if (city) {
+      query.andWhere('tprofile.city LIKE :city', { city: `%${city}%` });
+    }
+  
+    if (town) {
+      query.andWhere('tprofile.town LIKE :town', { town: `%${town}%` });
+    }
+  
+    if (name) {
+      query.andWhere('tprofile.name LIKE :name', { name: `%${name}%` });
+    }
+  
+    if (surname) {
+      query.andWhere('tprofile.surname LIKE :surname', { surname: `%${surname}%` });
+    }
+  
+    return await query.getMany();
+  }
+
   async findAllStudents(accessToken: string) {
     const decodedToken: any = this.jwtService.decode(accessToken);
     const userId = decodedToken.sub;
@@ -326,7 +348,8 @@ export class ProfileService {
       tProfile.phone = user;
       tProfile.email = user;
       tProfile.alma_mater = data.alma_mater;
-      tProfile.area = data.area;
+      tProfile.city = data.city;
+      tProfile.town = data.town;
       tProfile.explanation = data.explanation;
       tProfile.place = data.place;
     

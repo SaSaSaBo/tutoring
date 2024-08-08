@@ -44,6 +44,18 @@ export class UserController {
         return this.profileService.findAllDate(month, year);
       }
       
+      @Get('findTeachAsM')
+      @UseGuards(AuthGuard, RoleGuard, PermissionGuard)
+      @Permissions('view_users')
+      @Roles(Role.Manager)
+      async findTeachAsM(
+        @Query('city') city?: string,
+        @Query('town') town?: string,
+        @Query('name') name?: string,
+        @Query('surname') surname?: string,
+      ) {
+        return this.profileService.findTeachAsM(city, town, name, surname);
+      }
 
       @Get('teachers')
       @UseGuards(AuthGuard, RoleGuard, PermissionGuard)

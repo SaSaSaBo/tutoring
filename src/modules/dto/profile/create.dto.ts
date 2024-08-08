@@ -27,7 +27,10 @@ export class CreateTProfileDto {
     alma_mater: string;
   
     @IsString()
-    area: string;
+    city: string;
+
+    @IsString()
+    town: string;
   
     @IsString()
     explanation: string;
