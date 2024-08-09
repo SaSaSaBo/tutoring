@@ -13,6 +13,7 @@ import { PasswordService } from '../service/password.service';
 import { TProfileEntity } from './tprofile.entity';
 import { LogService } from '../service/log.service';
 import { ConnectionEntity } from '../connection/connection.entity';
+import { BlockEntity } from '../block/block.entity';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { ConnectionEntity } from '../connection/connection.entity';
       InfoEntity,
       TProfileEntity,
       ConnectionEntity,
+      BlockEntity,
     ])
   ],
   controllers: [ProfileController],

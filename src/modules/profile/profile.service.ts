@@ -16,6 +16,7 @@ import { TProfileEntity } from './tprofile.entity';
 import { PhoneVisibility } from '../enum/visibility.enum';
 import { Role } from '../enum/role.enum';
 import { ConnectionEntity } from '../connection/connection.entity';
+import { BlockEntity } from '../block/block.entity';
 
 @Injectable()
 export class ProfileService {
@@ -41,6 +42,9 @@ export class ProfileService {
 
         @InjectRepository(ConnectionEntity)
         private connectionRepository: Repository<ConnectionEntity>,
+
+        @InjectRepository(BlockEntity)
+        private blockRepository: Repository<BlockEntity>,
 
 
         private infoService: InfoService,
@@ -118,6 +122,15 @@ export class ProfileService {
     }
   
     return await query.getMany();
+  }
+
+  async findBlockedUser(): Promise<BlockEntity[]> {
+    return await this.blockRepository.find({
+      where: {
+        blocked: true,
+      },
+      relations: ['blocked'], // Burada 'user' ilişkili veriyi temsil eder.
+    });
   }
 
   async findAllStudents(accessToken: string) {
@@ -275,7 +288,7 @@ export class ProfileService {
     // Decode the token to get the user ID
     const decodedToken = this.jwtService.decode(accessToken);
     const userId = decodedToken.sub;
-  console.log('User ID:', userId);
+    console.log('User ID:', userId);
   
     // Find connections where either requesterId or requesteeId is the student user
     const connections = await this.connectionRepository

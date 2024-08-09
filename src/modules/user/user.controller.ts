@@ -57,6 +57,15 @@ export class UserController {
         return this.profileService.findTeachAsM(city, town, name, surname);
       }
 
+      @Get('blockedUsers')
+      @UseGuards(AuthGuard, RoleGuard, PermissionGuard)
+      @Permissions('view_users')
+      @Roles(Role.Manager)
+      async findBlockedUser() {
+        return this.profileService.findBlockedUser();
+      }
+
+
       @Get('teachers')
       @UseGuards(AuthGuard, RoleGuard, PermissionGuard)
       @Permissions('view_students')

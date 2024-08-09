@@ -13,7 +13,9 @@ export const roles = {
             'delete_cat', 
             'update_users',
             'update_cat',
-            'add_cat'
+            'add_cat',
+            'suspend_user',
+            'unsuspend_user',
     ],
     teacher: [
         'view_students', 

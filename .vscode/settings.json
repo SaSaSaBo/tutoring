@@ -6,12 +6,19 @@
         "clrs",
         "doğrulaması",
         "hata",
+        "için",
+        "işlemi",
+        "Kullanıcıyı",
+        "olarak",
         "requestee",
         "Stdnt",
         "studentcount",
         "Teachs",
         "tprofile",
-        "tprofiles"
+        "tprofiles",
+        "unsuspended",
+        "Unsuspending",
+        "yapılıyor"
     ],
     "DockerRun.DisableDockerrc": true
 }

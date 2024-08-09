@@ -41,6 +41,9 @@ import { ActivationModule } from './modules/activation/activation.module';
 import { PriLesModule } from './modules/pri-les/pri-les.module';
 import { PriLesEntity } from './modules/pri-les/pri-les.entity';
 import { NotificationService } from './modules/service/notification.service';
+import { SuspendModule } from './modules/suspend/suspend.module';
+import { SuspendEntity } from './modules/suspend/suspend.entity';
+import { SuspendService } from './modules/suspend/suspend.service';
 
 @Module({
   imports: [
@@ -62,6 +65,7 @@ import { NotificationService } from './modules/service/notification.service';
       BlockEntity,
       ProfileEntity,
       PriLesEntity,
+      SuspendEntity,
     ]),
     CategoryModule, 
     TransactionModule, 
@@ -77,6 +81,7 @@ import { NotificationService } from './modules/service/notification.service';
     ProfileModule,
     ActivationModule,
     PriLesModule,
+    SuspendModule,
   ],
   controllers: [AppController],
   providers: [
@@ -91,6 +96,7 @@ import { NotificationService } from './modules/service/notification.service';
     MessageService,
     ConnectionService,
     NotificationService,
+    SuspendService,
   ],
 })
 

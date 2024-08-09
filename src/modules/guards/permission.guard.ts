@@ -75,7 +75,17 @@ export class PermissionGuard implements CanActivate {
         return true;
       }
 
-      if (requiredPermissions.includes('view_users') && (userRole === 'manager' || userRole === 'teacher' || userRole === 'sub_teacher')) {
+      // Suspend User
+      if (requiredPermissions.includes('suspend_user') && userRole === 'manager') {
+        return true;
+      }
+      
+      // Unsuspend User
+      if (requiredPermissions.includes('unsuspend_user') && userRole === 'manager') {
+        return true;
+      }
+
+      if (requiredPermissions.includes('view_users') && (userRole === 'manager' || userRole === 'teacher')) {
         return true;
       }
 
@@ -83,7 +93,7 @@ export class PermissionGuard implements CanActivate {
         return true;
       }
 
-      if (requiredPermissions.includes('view_crs') && (userRole === 'manager' || userRole === 'teacher' || userRole === 'sub_teacher')) {
+      if (requiredPermissions.includes('view_crs') && (userRole === 'manager' || userRole === 'teacher')) {
         return true;
       }
 
@@ -98,17 +108,10 @@ export class PermissionGuard implements CanActivate {
       // Eklenen Kod: Classroom açma izni kontrolü
       if (requiredPermissions.includes('create_classroom')) {
         const userCategories = await this.usersService.getUserCategories(userId);
-        if (userRole === 'teacher' || userRole === 'sub_teacher') {
+        if (userRole === 'teacher') {
           if (userCategories.length === 0) {
             this.logger.warn('Teacher or sub_teacher cannot create classroom without a category');
             return false;
-          }
-          if (userRole === 'sub_teacher') {
-            const userClassrooms = await this.usersService.getUserClassrooms(userId);
-            if (userClassrooms.length >= 1) {
-              this.logger.warn('Sub_teacher cannot create more than one classroom');
-              return false;
-            }
           }
           return true;
         }

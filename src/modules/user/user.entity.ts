@@ -68,5 +68,6 @@ export class UsersEntity extends BaseEntity {
   blockedUsers: any;
   blockedBy: any;
     priLes: any;
+    suspend: any;
 
 }
